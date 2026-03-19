@@ -78,5 +78,59 @@
       ]
     },
     "contradictions": []
+  },
+  "REQ-000003": {
+    "request_id": "REQ-000003",
+    "cache_hit": false,
+    "processing_notes": [],
+    "extraction": {
+      "detected_language": "en",
+      "english_translation": null,
+      "qty_primary": 24.0,
+      "qty_primary_unit": "months",
+      "qty_total_rollout": null,
+      "qty_ambiguity_note": null,
+      "budget_extracted": 1320000.0,
+      "budget_currency": "EUR",
+      "preferred_supplier_in_text": null,
+      "policy_refusal": null,
+      "spec_mentioned": null,
+      "spec_implies_higher_cost": false,
+      "esg_signal_in_text": false,
+      "data_residency_signal_in_text": false,
+      "urgency_level": "standard",
+      "key_constraints": [
+        "Delivery by 2026-05-14"
+      ]
+    },
+    "contradictions": [
+      {
+        "contradiction_id": "C-001",
+        "contradiction_type": "QUANTITY_MISMATCH",
+        "severity": "critical",
+        "field_value": 60,
+        "text_value": 24.0,
+        "description": "Field quantity=60 months, but text implies 24.0 months. Difference: 60%.",
+        "recommended_action": "Confirm actual quantity with requester before pricing (ER-001)."
+      },
+      {
+        "contradiction_id": "C-002",
+        "contradiction_type": "BUDGET_MISMATCH",
+        "severity": "critical",
+        "field_value": "4972498.92 EUR",
+        "text_value": "1320000.0 EUR",
+        "description": "Field budget=4972498.92 EUR, but text states 1320000.0 EUR. Difference: 73%.",
+        "recommended_action": "Requester must confirm the authorised budget amount before award (ER-001)."
+      },
+      {
+        "contradiction_id": "C-003",
+        "contradiction_type": "LANGUAGE_MISMATCH",
+        "severity": "warning",
+        "field_value": "fr",
+        "text_value": "en",
+        "description": "request_language field='fr' but text is actually in 'en'. ",
+        "recommended_action": "Use detected language for NLP processing. The translated text is authoritative."
+      }
+    ]
   }
 }

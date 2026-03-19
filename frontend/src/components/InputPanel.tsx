@@ -6,7 +6,7 @@ import { EXAMPLE_REQUESTS } from '@/lib/demo';
 import type { PurchaseRequest } from '@/lib/types';
 
 interface InputPanelProps {
-  onAnalyze: (req: PurchaseRequest, demoKey?: string, uploadedFile?: File) => void;
+  onAnalyze: (req: PurchaseRequest, demoKey?: string, uploadedFile?: File, parsedRequests?: Record<string, unknown>[]) => void;
   loading: boolean;
 }
 
@@ -24,6 +24,8 @@ export default function InputPanel({ onAnalyze, loading }: InputPanelProps) {
   const [jsonText, setJsonText] = useState('');
   const [fileName, setFileName] = useState('');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [requestCount, setRequestCount] = useState<number | null>(null);
+  const [parsedRequests, setParsedRequests] = useState<Record<string, unknown>[] | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -76,8 +78,14 @@ export default function InputPanel({ onAnalyze, loading }: InputPanelProps) {
 
   const handleJsonSubmit = () => {
     if (!uploadedFile && !jsonText.trim()) { alert('Please paste or upload a JSON request.'); return; }
-    // If file was uploaded, send it directly to backend
-    if (uploadedFile) {
+    // Batch mode: file with multiple requests
+    if (parsedRequests && parsedRequests.length > 1) {
+      const empty = {} as PurchaseRequest;
+      onAnalyze(empty, undefined, undefined, parsedRequests);
+      return;
+    }
+    // Single file upload
+    if (uploadedFile && (!parsedRequests || parsedRequests.length <= 1)) {
       const empty = {} as PurchaseRequest;
       onAnalyze(empty, undefined, uploadedFile);
       return;
@@ -91,11 +99,21 @@ export default function InputPanel({ onAnalyze, loading }: InputPanelProps) {
   const readFile = (file: File) => {
     setUploadedFile(file);
     setFileName(file.name);
+    setParsedRequests(null);
+    setRequestCount(null);
     const reader = new FileReader();
     reader.onload = ev => {
       try {
         const data = JSON.parse(ev.target?.result as string);
-        setJsonText(JSON.stringify(Array.isArray(data) ? data[0] : data, null, 2));
+        if (Array.isArray(data)) {
+          setParsedRequests(data);
+          setRequestCount(data.length);
+          setJsonText(JSON.stringify(data[0], null, 2));
+        } else {
+          setParsedRequests([data]);
+          setRequestCount(1);
+          setJsonText(JSON.stringify(data, null, 2));
+        }
       } catch { alert('Invalid JSON file'); }
     };
     reader.readAsText(file);
@@ -318,7 +336,19 @@ export default function InputPanel({ onAnalyze, loading }: InputPanelProps) {
             <div style={{ fontSize: 28, marginBottom: 8, opacity: 0.4 }}>⬆</div>
             <div style={{ fontSize: 13 }}>Drop <strong>requests.json</strong> here</div>
             <div style={{ fontSize: 11, marginTop: 5, color: '#94A3B8' }}>or click to browse · accepts .json</div>
-            {fileName && <div style={{ marginTop: 10, fontSize: 11, color: '#E30613' }}>📄 {fileName}</div>}
+            {fileName && (
+              <div style={{ marginTop: 10, fontSize: 11, color: '#E30613' }}>
+                📄 {fileName}
+                {requestCount != null && requestCount > 1 && (
+                  <span style={{ marginLeft: 8, background: '#1E293B', color: '#fff', borderRadius: 3, padding: '1px 7px', fontSize: 10, fontWeight: 700 }}>
+                    📋 {requestCount} requests — batch mode
+                  </span>
+                )}
+                {requestCount === 1 && (
+                  <span style={{ marginLeft: 8, color: '#059669', fontSize: 10, fontWeight: 600 }}>✓ 1 request</span>
+                )}
+              </div>
+            )}
           </div>
           <input type="file" ref={fileInputRef} accept=".json" style={{ display: 'none' }}
             onChange={e => { if (e.target.files?.[0]) readFile(e.target.files[0]); }} />

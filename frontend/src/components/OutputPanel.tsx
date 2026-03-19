@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { AnalysisResult, SupplierResult, PolicyRule, Escalation, AuditEntry, BackendResult } from '@/lib/types';
+import type { BatchEntry } from '@/app/page';
 
 // ”€”€ Utility ”€”€
 function h(s: unknown): string {
@@ -957,6 +958,8 @@ function BackendDetailsCard({ b }: { b: BackendResult }) {
   );
 }
 
+
+
 // ── Audit Document Generator ─────────────────────────────────────────────────
 function generateAuditHTML(result: AnalysisResult, backendRaw: BackendResult | null | undefined, thinkingSteps?: {title: string, description: string}[]): string {
   const now = new Date().toISOString().replace('T', ' ').split('.')[0] + ' UTC';
@@ -1059,6 +1062,7 @@ function generateAuditHTML(result: AnalysisResult, backendRaw: BackendResult | n
     .section-title { font-size: 14px; font-weight: 700; color: #0F172A; text-transform: uppercase; letter-spacing: 0.08em; padding-bottom: 8px; border-bottom: 2px solid #E2E8F0; margin-bottom: 16px; }
     table { width: 100%; border-collapse: collapse; font-size: 12px; }
     thead tr { background: #F8FAFC; }
+    th { padding: 9px 10px; text-align: left; font-size: 10px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: #6B7280; border-bottom: 2px solid #E2E8F0; }
     th { padding: 9px 10px; text-align: left; font-size: 10px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: #6B7280; border-bottom: 2px solid #E2E8F0; }
     .kv-grid { display: grid; grid-template-columns: 200px 1fr; gap: 0; border: 1px solid #E2E8F0; border-radius: 5px; overflow: hidden; margin-bottom: 16px; }
     .kv-row { display: contents; }
@@ -1341,6 +1345,241 @@ function DownloadAuditButton({ result, backendRaw, thinkingSteps }: { result: An
   );
 }
 
+// ── Batch View ────────────────────────────────────────────────────────────────────────────────────────
+function BatchTabBar({
+  entries, selected, onSelect,
+}: {
+  entries: BatchEntry[];
+  selected: number;
+  onSelect: (i: number) => void;
+}) {
+  const tabsRef = useRef<HTMLDivElement>(null);
+
+  // scroll selected tab into view
+  useEffect(() => {
+    if (tabsRef.current) {
+      const btn = tabsRef.current.children[selected] as HTMLElement | undefined;
+      btn?.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
+    }
+  }, [selected]);
+
+  return (
+    <div
+      ref={tabsRef}
+      style={{
+        display: 'flex', gap: 4, overflowX: 'auto', padding: '10px 14px 0',
+        background: '#F8FAFC', borderBottom: '1px solid #E2E8F0',
+        flexShrink: 0, scrollbarWidth: 'none',
+      }}
+    >
+      {entries.map((e, i) => {
+        const isActive = i === selected;
+        const isProcessing = e.status === 'processing';
+        const isDone = e.status === 'done';
+        const hasError = isDone && !!e.error;
+        const hasDone = isDone && !e.error;
+
+        const statusIcon = isProcessing ? (
+          <span style={{
+            display: 'inline-block', width: 10, height: 10, borderRadius: '50%',
+            border: '1.5px solid #6366F1', borderTopColor: 'transparent',
+            animation: 'spin 0.8s linear infinite', flexShrink: 0,
+          }} />
+        ) : hasDone ? (
+          <span style={{ color: '#059669', fontSize: 10, fontWeight: 800, lineHeight: 1 }}>✓</span>
+        ) : hasError ? (
+          <span style={{ color: '#DC2626', fontSize: 10, fontWeight: 800, lineHeight: 1 }}>✗</span>
+        ) : (
+          <span style={{ color: '#CBD5E1', fontSize: 9, fontWeight: 700, lineHeight: 1 }}>●</span>
+        );
+
+        return (
+          <button
+            key={e.id}
+            onClick={() => onSelect(i)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 6,
+              padding: '7px 12px 9px',
+              border: 'none', borderBottom: isActive ? '2px solid #6366F1' : '2px solid transparent',
+              background: isActive ? '#fff' : 'transparent',
+              cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
+              borderRadius: '4px 4px 0 0',
+              fontSize: 11.5,
+              fontWeight: isActive ? 700 : 500,
+              color: isActive ? '#1E293B' : '#64748B',
+              transition: 'color 0.15s, background 0.15s',
+              outline: 'none',
+            }}
+          >
+            {statusIcon}
+            <span>{e.id}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function BatchEntryPanel({ entry }: { entry: BatchEntry }) {
+  const isProcessing = entry.status === 'processing';
+  const isPending = entry.status === 'pending';
+  const isDone = entry.status === 'done';
+  const hasResult = isDone && entry.result && !entry.error;
+  const hasError = isDone && !!entry.error;
+  const hasSteps = entry.thinkingSteps && entry.thinkingSteps.length > 0;
+
+  return (
+    <div style={{ padding: '16px 18px', overflowY: 'auto', height: '100%' }}>
+
+      {/* Live reasoning (shown while processing and after done) */}
+      {hasSteps && (
+        <AIThinkingSteps
+          steps={entry.thinkingSteps}
+          expandedInitially={isProcessing}
+          isComplete={isDone}
+        />
+      )}
+
+      {/* Pending placeholder */}
+      {isPending && (
+        <div style={{
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+          padding: '48px 20px', gap: 10, color: '#94A3B8',
+        }}>
+          <div style={{ fontSize: 28, opacity: 0.35 }}>⏳</div>
+          <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.05em' }}>QUEUED</div>
+          <div style={{ fontSize: 11, color: '#CBD5E1' }}>This request is waiting to be processed</div>
+        </div>
+      )}
+
+      {/* Processing spinner (shown when steps haven't arrived yet) */}
+      {isProcessing && !hasSteps && (
+        <div style={{
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+          padding: '48px 20px', gap: 14,
+        }}>
+          <div style={{ position: 'relative', width: 48, height: 48 }}>
+            <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '2.5px solid #E8EDF3', boxSizing: 'border-box' }} />
+            <div style={{
+              position: 'absolute', inset: 0, borderRadius: '50%',
+              border: '2.5px solid transparent', borderTopColor: '#6366F1',
+              boxSizing: 'border-box', animation: 'spin 0.8s linear infinite',
+            }} />
+            <div style={{
+              position: 'absolute', inset: 7, borderRadius: '50%',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontWeight: 800, fontSize: 10, color: '#1E293B',
+            }}>IQ</div>
+          </div>
+          <div style={{ fontWeight: 700, fontSize: 12, letterSpacing: '0.08em', color: '#374151', textTransform: 'uppercase' }}>Processing…</div>
+        </div>
+      )}
+
+      {/* Error state */}
+      {hasError && (
+        <div style={{ background: 'rgba(220,38,38,0.04)', border: '1px solid rgba(220,38,38,0.25)', borderLeft: '3px solid #DC2626', borderRadius: 4, padding: 16, marginBottom: 14 }}>
+          <div style={{ fontWeight: 600, fontSize: 13, color: '#DC2626', marginBottom: 6 }}>Analysis Failed</div>
+          <div style={{ fontSize: 11.5, color: '#374151', lineHeight: 1.6, wordBreak: 'break-all' }}>{entry.error}</div>
+        </div>
+      )}
+
+      {/* Full results */}
+      {hasResult && entry.result && (
+        <div>
+          <ParsedRequestCard data={entry.result.request_parsed} compat={entry.result.compatibility} />
+          <PolicyCard rules={entry.result.policy_evaluation} />
+          <SupplierCard suppliers={entry.result.suppliers} />
+          <EscalationCard escalations={entry.result.escalations} />
+          <RecommendationCard rec={entry.result.recommendation} />
+          <AuditLogCard entries={entry.result.audit_log} />
+          {entry.backendRaw && <BackendDetailsCard b={entry.backendRaw} />}
+          <DownloadAuditButton result={entry.result} backendRaw={entry.backendRaw} thinkingSteps={entry.thinkingSteps} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function BatchView({
+  entries, progress,
+}: {
+  entries: BatchEntry[];
+  progress: { current: number; total: number } | null;
+}) {
+  // Auto-switch to the currently-processing tab. User can override by clicking manually.
+  const processingIdx = entries.findIndex(e => e.status === 'processing');
+  const [manualTab, setManualTab] = useState<number | null>(null);
+  const lastProcessingIdx = useRef(-1);
+
+  // When a new request starts processing, auto-follow — but only if user hasn't manually picked a
+  // different tab (or if they're on the old processing one, we still auto-follow).
+  useEffect(() => {
+    if (processingIdx === -1) return;
+    if (processingIdx === lastProcessingIdx.current) return;
+    lastProcessingIdx.current = processingIdx;
+    // Auto-follow: update manualTab so the tab bar highlights it
+    setManualTab(processingIdx);
+  }, [processingIdx]);
+
+  const selectedIdx = manualTab !== null ? manualTab : (processingIdx !== -1 ? processingIdx : entries.length - 1);
+  const clampedIdx = Math.max(0, Math.min(selectedIdx, entries.length - 1));
+  const selectedEntry = entries[clampedIdx];
+
+  const doneCount = entries.filter(e => e.status === 'done').length;
+  const allDone = doneCount === entries.length;
+  const isRunning = processingIdx !== -1;
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+
+      {/* Progress banner */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '8px 16px',
+        background: allDone ? 'rgba(5,150,105,0.06)' : 'rgba(99,102,241,0.06)',
+        borderBottom: '1px solid ' + (allDone ? 'rgba(5,150,105,0.18)' : 'rgba(99,102,241,0.18)'),
+        flexShrink: 0,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {isRunning && (
+            <div style={{
+              width: 12, height: 12, borderRadius: '50%',
+              border: '2px solid #6366F1', borderTopColor: 'transparent',
+              animation: 'spin 0.8s linear infinite', flexShrink: 0,
+            }} />
+          )}
+          {allDone && (
+            <div style={{ width: 14, height: 14, borderRadius: '50%', background: '#059669', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700 }}>✓</div>
+          )}
+          <span style={{ fontSize: 12, fontWeight: 700, color: allDone ? '#059669' : '#4338CA' }}>
+            {allDone ? `All ${entries.length} requests completed` : `Processing ${progress?.current ?? 0} of ${progress?.total ?? entries.length}…`}
+          </span>
+        </div>
+
+        {/* Mini progress bar */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+          <div style={{ width: 100, height: 4, background: '#E2E8F0', borderRadius: 2, overflow: 'hidden' }}>
+            <div style={{
+              height: '100%', borderRadius: 2, transition: 'width 0.4s ease',
+              background: allDone ? '#059669' : 'linear-gradient(90deg,#6366F1,#818CF8)',
+              width: `${entries.length > 0 ? (doneCount / entries.length) * 100 : 0}%`,
+            }} />
+          </div>
+          <span style={{ fontSize: 10, color: '#94A3B8', fontWeight: 600 }}>{doneCount}/{entries.length}</span>
+        </div>
+      </div>
+
+      {/* Tab bar */}
+      <BatchTabBar entries={entries} selected={clampedIdx} onSelect={(i) => setManualTab(i)} />
+
+      {/* Tab content — fills remaining height */}
+      <div style={{ flex: 1, overflow: 'hidden' }}>
+        <BatchEntryPanel key={clampedIdx} entry={selectedEntry} />
+      </div>
+    </div>
+  );
+}
+
 // ”€”€ Main Output Panel ”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€
 interface OutputPanelProps {
   view: 'empty' | 'loading' | 'results';
@@ -1349,9 +1588,20 @@ interface OutputPanelProps {
   loadingStep: number;
   error: string | null;
   thinkingSteps?: {title: string, description: string}[];
+  batchResults?: BatchEntry[];
+  batchProgress?: { current: number; total: number } | null;
 }
 
-export default function OutputPanel({ view, result, backendRaw, loadingStep, error, thinkingSteps }: OutputPanelProps) {
+export default function OutputPanel({ view, result, backendRaw, loadingStep, error, thinkingSteps, batchResults, batchProgress }: OutputPanelProps) {
+  // Batch mode: shows tab switcher
+  if (batchResults && batchResults.length > 0) {
+    return (
+      <div style={{ height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        <BatchView entries={batchResults} progress={batchProgress ?? null} />
+      </div>
+    );
+  }
+
   return (
     <div style={{ padding: '16px 18px', overflowY: 'auto', height: '100%' }}>
       {view === 'empty' && <EmptyState />}
