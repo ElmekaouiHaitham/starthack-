@@ -1,0 +1,31 @@
+category_l1,category_l2,category_description,typical_unit,pricing_model
+IT,Laptops,Standard employee laptops,device,tiered
+IT,Mobile Workstations,High-performance portable workstations,device,tiered
+IT,Desktop Workstations,Fixed high-performance workstations,device,tiered
+IT,Monitors,External display monitors,device,tiered
+IT,Docking Stations,Laptop docking stations,device,tiered
+IT,Smartphones,Corporate mobile phones,device,tiered
+IT,Tablets,Corporate tablets,device,tiered
+IT,Rugged Devices,Field-use rugged tablets and laptops,device,tiered
+IT,Accessories Bundles,Peripheral bundles such as keyboard mouse headset,set,tiered
+IT,Replacement / Break-Fix Pool Devices,Spare device stock for replacements,device,tiered
+IT,Cloud Compute,Public cloud compute services,instance_hour,usage
+IT,Cloud Storage,Cloud storage capacity,TB_month,usage
+IT,Cloud Networking,Cloud networking and traffic routing,GB_transfer,usage
+IT,Managed Cloud Platform Services,Managed Kubernetes and platform services,monthly_subscription,subscription
+IT,Cloud Security Services,Cloud security monitoring services,seat_license,subscription
+Facilities,Workstations and Desks,Employee desks and workstations,unit,tiered
+Facilities,Office Chairs,Ergonomic seating,unit,tiered
+Facilities,Meeting Room Furniture,Meeting room tables and chairs,set,fixed
+Facilities,Storage Cabinets,Office storage furniture,unit,tiered
+Facilities,Reception and Lounge Furniture,Reception seating and lounge furniture,project,fixed
+Professional Services,Cloud Architecture Consulting,Cloud architecture advisory services,consulting_day,day_rate
+Professional Services,Cybersecurity Advisory,Cybersecurity consulting services,consulting_day,day_rate
+Professional Services,Data Engineering Services,Data platform development consulting,consulting_day,day_rate
+Professional Services,Software Development Services,Application development consulting,consulting_day,blended_rate
+Professional Services,IT Project Management Services,Project management consulting services,consulting_day,day_rate
+Marketing,Search Engine Marketing (SEM),Paid search campaign management,campaign,performance
+Marketing,Social Media Advertising,Social media campaign management,campaign,performance
+Marketing,Content Production Services,Content creation and media production,project,fixed
+Marketing,Marketing Analytics Services,Marketing data analysis and reporting,monthly_subscription,subscription
+Marketing,Influencer Campaign Management,Influencer marketing campaigns,campaign,fixed

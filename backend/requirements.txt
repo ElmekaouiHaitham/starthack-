@@ -1,0 +1,18 @@
+# Core LLM & Framework
+langchain_huggingface
+langchain>=0.1.0
+langchain-google-genai
+langgraph
+python-dotenv
+
+# Vector Store & Embeddings
+sentence-transformers
+faiss-cpu
+langchain-community
+
+# Evaluation
+pandas
+
+# Utilities
+ipykernel  # To run notebooks
+tqdm       # For progress bars

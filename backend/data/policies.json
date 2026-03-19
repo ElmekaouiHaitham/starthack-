@@ -1,0 +1,1085 @@
+{
+  "approval_thresholds": [
+    {
+      "threshold_id": "AT-001",
+      "currency": "EUR",
+      "min_amount": 0,
+      "max_amount": 24999.99,
+      "min_supplier_quotes": 1,
+      "managed_by": [
+        "business"
+      ],
+      "deviation_approval_required_from": []
+    },
+    {
+      "threshold_id": "AT-002",
+      "currency": "EUR",
+      "min_amount": 25000,
+      "max_amount": 99999.99,
+      "min_supplier_quotes": 2,
+      "managed_by": [
+        "business",
+        "procurement"
+      ],
+      "deviation_approval_required_from": [
+        "Procurement Manager"
+      ]
+    },
+    {
+      "threshold_id": "AT-003",
+      "currency": "EUR",
+      "min_amount": 100000,
+      "max_amount": 499999.99,
+      "min_supplier_quotes": 3,
+      "managed_by": [
+        "procurement"
+      ],
+      "deviation_approval_required_from": [
+        "Head of Category"
+      ]
+    },
+    {
+      "threshold_id": "AT-004",
+      "currency": "EUR",
+      "min_amount": 500000,
+      "max_amount": 4999999.99,
+      "min_supplier_quotes": 3,
+      "managed_by": [
+        "procurement"
+      ],
+      "deviation_approval_required_from": [
+        "Head of Strategic Sourcing"
+      ]
+    },
+    {
+      "threshold_id": "AT-005",
+      "currency": "EUR",
+      "min_amount": 5000000,
+      "max_amount": 999999999.99,
+      "min_supplier_quotes": 3,
+      "managed_by": [
+        "procurement"
+      ],
+      "deviation_approval_required_from": [
+        "CPO"
+      ]
+    },
+    {
+      "threshold_id": "AT-006",
+      "currency": "CHF",
+      "min_amount": 0,
+      "max_amount": 24999.99,
+      "min_supplier_quotes": 1,
+      "managed_by": [
+        "business"
+      ],
+      "deviation_approval_required_from": []
+    },
+    {
+      "threshold_id": "AT-007",
+      "currency": "CHF",
+      "min_amount": 25000,
+      "max_amount": 99999.99,
+      "min_supplier_quotes": 2,
+      "managed_by": [
+        "business",
+        "procurement"
+      ],
+      "deviation_approval_required_from": [
+        "Procurement Manager"
+      ]
+    },
+    {
+      "threshold_id": "AT-008",
+      "currency": "CHF",
+      "min_amount": 100000,
+      "max_amount": 499999.99,
+      "min_supplier_quotes": 3,
+      "managed_by": [
+        "procurement"
+      ],
+      "deviation_approval_required_from": [
+        "Head of Category"
+      ]
+    },
+    {
+      "threshold_id": "AT-009",
+      "currency": "CHF",
+      "min_amount": 500000,
+      "max_amount": 4999999.99,
+      "min_supplier_quotes": 3,
+      "managed_by": [
+        "procurement"
+      ],
+      "deviation_approval_required_from": [
+        "Head of Strategic Sourcing"
+      ]
+    },
+    {
+      "threshold_id": "AT-010",
+      "currency": "CHF",
+      "min_amount": 5000000,
+      "max_amount": 999999999.99,
+      "min_supplier_quotes": 3,
+      "managed_by": [
+        "procurement"
+      ],
+      "deviation_approval_required_from": [
+        "CPO"
+      ]
+    },
+    {
+      "threshold_id": "AT-011",
+      "currency": "USD",
+      "min_value": 0,
+      "max_value": 27000,
+      "quotes_required": 1,
+      "approvers": [
+        "business"
+      ],
+      "policy_note": "Single quote acceptable; business sign-off sufficient"
+    },
+    {
+      "threshold_id": "AT-012",
+      "currency": "USD",
+      "min_value": 27000,
+      "max_value": 108000,
+      "quotes_required": 2,
+      "approvers": [
+        "business",
+        "procurement"
+      ],
+      "policy_note": "Two quotes required; deviation requires Procurement Manager approval"
+    },
+    {
+      "threshold_id": "AT-013",
+      "currency": "USD",
+      "min_value": 108000,
+      "max_value": 540000,
+      "quotes_required": 3,
+      "approvers": [
+        "procurement"
+      ],
+      "policy_note": "Three quotes required; Head of Category approval"
+    },
+    {
+      "threshold_id": "AT-014",
+      "currency": "USD",
+      "min_value": 540000,
+      "max_value": 5400000,
+      "quotes_required": 3,
+      "approvers": [
+        "head_of_strategic_sourcing"
+      ],
+      "policy_note": "Three quotes required; Head of Strategic Sourcing approval"
+    },
+    {
+      "threshold_id": "AT-015",
+      "currency": "USD",
+      "min_value": 5400000,
+      "max_value": null,
+      "quotes_required": 3,
+      "approvers": [
+        "cpo"
+      ],
+      "policy_note": "Three quotes required; CPO approval"
+    }
+  ],
+  "preferred_suppliers": [
+    {
+      "supplier_id": "SUP-0001",
+      "supplier_name": "Dell Enterprise Europe",
+      "category_l1": "IT",
+      "category_l2": "Laptops",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0001",
+      "supplier_name": "Dell Enterprise Europe",
+      "category_l1": "IT",
+      "category_l2": "Mobile Workstations",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0001",
+      "supplier_name": "Dell Enterprise Europe",
+      "category_l1": "IT",
+      "category_l2": "Monitors",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0001",
+      "supplier_name": "Dell Enterprise Europe",
+      "category_l1": "IT",
+      "category_l2": "Docking Stations",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0001",
+      "supplier_name": "Dell Enterprise Europe",
+      "category_l1": "IT",
+      "category_l2": "Replacement / Break-Fix Pool Devices",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0002",
+      "supplier_name": "HP Enterprise Devices",
+      "category_l1": "IT",
+      "category_l2": "Laptops",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0002",
+      "supplier_name": "HP Enterprise Devices",
+      "category_l1": "IT",
+      "category_l2": "Mobile Workstations",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0002",
+      "supplier_name": "HP Enterprise Devices",
+      "category_l1": "IT",
+      "category_l2": "Desktop Workstations",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0002",
+      "supplier_name": "HP Enterprise Devices",
+      "category_l1": "IT",
+      "category_l2": "Monitors",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0002",
+      "supplier_name": "HP Enterprise Devices",
+      "category_l1": "IT",
+      "category_l2": "Docking Stations",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0003",
+      "supplier_name": "Lenovo Commercial EU",
+      "category_l1": "IT",
+      "category_l2": "Laptops",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0003",
+      "supplier_name": "Lenovo Commercial EU",
+      "category_l1": "IT",
+      "category_l2": "Desktop Workstations",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0003",
+      "supplier_name": "Lenovo Commercial EU",
+      "category_l1": "IT",
+      "category_l2": "Tablets",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0003",
+      "supplier_name": "Lenovo Commercial EU",
+      "category_l1": "IT",
+      "category_l2": "Accessories Bundles",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0007",
+      "supplier_name": "Bechtle Workplace Solutions",
+      "category_l1": "IT",
+      "category_l2": "Laptops",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0007",
+      "supplier_name": "Bechtle Workplace Solutions",
+      "category_l1": "IT",
+      "category_l2": "Monitors",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0007",
+      "supplier_name": "Bechtle Workplace Solutions",
+      "category_l1": "IT",
+      "category_l2": "Docking Stations",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0007",
+      "supplier_name": "Bechtle Workplace Solutions",
+      "category_l1": "IT",
+      "category_l2": "Accessories Bundles",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0007",
+      "supplier_name": "Bechtle Workplace Solutions",
+      "category_l1": "IT",
+      "category_l2": "Replacement / Break-Fix Pool Devices",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0010",
+      "supplier_name": "Azure Enterprise",
+      "category_l1": "IT",
+      "category_l2": "Cloud Compute",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0010",
+      "supplier_name": "Azure Enterprise",
+      "category_l1": "IT",
+      "category_l2": "Cloud Storage",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0010",
+      "supplier_name": "Azure Enterprise",
+      "category_l1": "IT",
+      "category_l2": "Cloud Networking",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0010",
+      "supplier_name": "Azure Enterprise",
+      "category_l1": "IT",
+      "category_l2": "Managed Cloud Platform Services",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0010",
+      "supplier_name": "Azure Enterprise",
+      "category_l1": "IT",
+      "category_l2": "Cloud Security Services",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0020",
+      "supplier_name": "Kinnarps Workplace",
+      "category_l1": "Facilities",
+      "category_l2": "Workstations and Desks",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0020",
+      "supplier_name": "Kinnarps Workplace",
+      "category_l1": "Facilities",
+      "category_l2": "Office Chairs",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0020",
+      "supplier_name": "Kinnarps Workplace",
+      "category_l1": "Facilities",
+      "category_l2": "Meeting Room Furniture",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0020",
+      "supplier_name": "Kinnarps Workplace",
+      "category_l1": "Facilities",
+      "category_l2": "Storage Cabinets",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0020",
+      "supplier_name": "Kinnarps Workplace",
+      "category_l1": "Facilities",
+      "category_l2": "Reception and Lounge Furniture",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0021",
+      "supplier_name": "Steelcase Europe",
+      "category_l1": "Facilities",
+      "category_l2": "Workstations and Desks",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0021",
+      "supplier_name": "Steelcase Europe",
+      "category_l1": "Facilities",
+      "category_l2": "Office Chairs",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0021",
+      "supplier_name": "Steelcase Europe",
+      "category_l1": "Facilities",
+      "category_l2": "Meeting Room Furniture",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0021",
+      "supplier_name": "Steelcase Europe",
+      "category_l1": "Facilities",
+      "category_l2": "Reception and Lounge Furniture",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0030",
+      "supplier_name": "Accenture Advisory Europe",
+      "category_l1": "Professional Services",
+      "category_l2": "Cloud Architecture Consulting",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0030",
+      "supplier_name": "Accenture Advisory Europe",
+      "category_l1": "Professional Services",
+      "category_l2": "Cybersecurity Advisory",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0030",
+      "supplier_name": "Accenture Advisory Europe",
+      "category_l1": "Professional Services",
+      "category_l2": "Data Engineering Services",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0030",
+      "supplier_name": "Accenture Advisory Europe",
+      "category_l1": "Professional Services",
+      "category_l2": "IT Project Management Services",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0031",
+      "supplier_name": "Capgemini Consulting",
+      "category_l1": "Professional Services",
+      "category_l2": "Cloud Architecture Consulting",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0031",
+      "supplier_name": "Capgemini Consulting",
+      "category_l1": "Professional Services",
+      "category_l2": "Cybersecurity Advisory",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0031",
+      "supplier_name": "Capgemini Consulting",
+      "category_l1": "Professional Services",
+      "category_l2": "Data Engineering Services",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0031",
+      "supplier_name": "Capgemini Consulting",
+      "category_l1": "Professional Services",
+      "category_l2": "Software Development Services",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0031",
+      "supplier_name": "Capgemini Consulting",
+      "category_l1": "Professional Services",
+      "category_l2": "IT Project Management Services",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0040",
+      "supplier_name": "WPP Performance Media",
+      "category_l1": "Marketing",
+      "category_l2": "Search Engine Marketing (SEM)",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0040",
+      "supplier_name": "WPP Performance Media",
+      "category_l1": "Marketing",
+      "category_l2": "Social Media Advertising",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0040",
+      "supplier_name": "WPP Performance Media",
+      "category_l1": "Marketing",
+      "category_l2": "Content Production Services",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0040",
+      "supplier_name": "WPP Performance Media",
+      "category_l1": "Marketing",
+      "category_l2": "Marketing Analytics Services",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0040",
+      "supplier_name": "WPP Performance Media",
+      "category_l1": "Marketing",
+      "category_l2": "Influencer Campaign Management",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0041",
+      "supplier_name": "Publicis Digital Europe",
+      "category_l1": "Marketing",
+      "category_l2": "Search Engine Marketing (SEM)",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0041",
+      "supplier_name": "Publicis Digital Europe",
+      "category_l1": "Marketing",
+      "category_l2": "Social Media Advertising",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0041",
+      "supplier_name": "Publicis Digital Europe",
+      "category_l1": "Marketing",
+      "category_l2": "Content Production Services",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0041",
+      "supplier_name": "Publicis Digital Europe",
+      "category_l1": "Marketing",
+      "category_l2": "Marketing Analytics Services",
+      "region_scope": [
+        "EU",
+        "CH"
+      ],
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0009",
+      "supplier_name": "Insight Technology Group",
+      "category_l1": "IT",
+      "category_l2": "Laptops",
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0009",
+      "supplier_name": "Insight Technology Group",
+      "category_l1": "IT",
+      "category_l2": "Monitors",
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0009",
+      "supplier_name": "Insight Technology Group",
+      "category_l1": "IT",
+      "category_l2": "Desktop Workstations",
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0015",
+      "supplier_name": "Oracle Cloud Infrastructure",
+      "category_l1": "IT",
+      "category_l2": "Managed Cloud Platform Services",
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0025",
+      "supplier_name": "Steelcase Americas",
+      "category_l1": "Facilities",
+      "category_l2": "Workstations and Desks",
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0025",
+      "supplier_name": "Steelcase Americas",
+      "category_l1": "Facilities",
+      "category_l2": "Office Chairs",
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0025",
+      "supplier_name": "Steelcase Americas",
+      "category_l1": "Facilities",
+      "category_l2": "Meeting Room Furniture",
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0046",
+      "supplier_name": "Dentsu International",
+      "category_l1": "Marketing",
+      "category_l2": "Search Engine Marketing (SEM)",
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0046",
+      "supplier_name": "Dentsu International",
+      "category_l1": "Marketing",
+      "category_l2": "Social Media Advertising",
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    },
+    {
+      "supplier_id": "SUP-0047",
+      "supplier_name": "Havas Group Americas",
+      "category_l1": "Marketing",
+      "category_l2": "Content Production Services",
+      "policy_note": "Preferred where commercially competitive and policy-compliant"
+    }
+  ],
+  "restricted_suppliers": [
+    {
+      "supplier_id": "SUP-0008",
+      "supplier_name": "Computacenter Devices",
+      "category_l1": "IT",
+      "category_l2": "Laptops",
+      "restriction_scope": [
+        "CH",
+        "DE"
+      ],
+      "restriction_reason": "Policy restriction for selected device sourcing events"
+    },
+    {
+      "supplier_id": "SUP-0008",
+      "supplier_name": "Computacenter Devices",
+      "category_l1": "IT",
+      "category_l2": "Mobile Workstations",
+      "restriction_scope": [
+        "CH"
+      ],
+      "restriction_reason": "Country restriction in hackathon policy set"
+    },
+    {
+      "supplier_id": "SUP-0011",
+      "supplier_name": "AWS Enterprise EMEA",
+      "category_l1": "IT",
+      "category_l2": "Cloud Storage",
+      "restriction_scope": [
+        "CH"
+      ],
+      "restriction_reason": "Swiss residency-sensitive data scenarios require sovereign or approved providers"
+    },
+    {
+      "supplier_id": "SUP-0045",
+      "supplier_name": "Boutique Creator Network",
+      "category_l1": "Marketing",
+      "category_l2": "Influencer Campaign Management",
+      "restriction_scope": [
+        "all"
+      ],
+      "restriction_reason": "Can be used only below EUR 75000 without exception approval"
+    },
+    {
+      "supplier_id": "SUP-0017",
+      "supplier_name": "Alibaba Cloud International",
+      "category_l1": "IT",
+      "category_l2": "Cloud Storage",
+      "restriction_scope": [
+        "US",
+        "CA",
+        "AU",
+        "IN"
+      ],
+      "restriction_reason": "Data sovereignty risk for sensitive/regulated data in listed jurisdictions. Requires Regional Compliance Lead exception approval for these countries."
+    }
+  ],
+  "category_rules": [
+    {
+      "rule_id": "CR-001",
+      "category_l1": "IT",
+      "category_l2": "Laptops",
+      "rule_type": "mandatory_comparison",
+      "rule_text": "At least three compliant supplier options must be compared above EUR/CHF 100000"
+    },
+    {
+      "rule_id": "CR-002",
+      "category_l1": "IT",
+      "category_l2": "Mobile Workstations",
+      "rule_type": "engineering_spec_review",
+      "rule_text": "Mobile workstation requests above 50 units require compatibility review with engineering or CAD lead"
+    },
+    {
+      "rule_id": "CR-003",
+      "category_l1": "IT",
+      "category_l2": "Replacement / Break-Fix Pool Devices",
+      "rule_type": "fast_track",
+      "rule_text": "Break-fix pool replenishment below EUR/CHF 75000 may use fast-track approval with one quote"
+    },
+    {
+      "rule_id": "CR-004",
+      "category_l1": "IT",
+      "category_l2": "Cloud Compute",
+      "rule_type": "residency_check",
+      "rule_text": "Requests marked with data residency constraint must be evaluated only against suppliers supporting residency requirements"
+    },
+    {
+      "rule_id": "CR-005",
+      "category_l1": "IT",
+      "category_l2": "Managed Cloud Platform Services",
+      "rule_type": "security_review",
+      "rule_text": "Managed platform requests above EUR/CHF 250000 require security architecture review"
+    },
+    {
+      "rule_id": "CR-006",
+      "category_l1": "Facilities",
+      "category_l2": "Reception and Lounge Furniture",
+      "rule_type": "design_signoff",
+      "rule_text": "Reception and lounge projects require business design sign-off before award"
+    },
+    {
+      "rule_id": "CR-007",
+      "category_l1": "Professional Services",
+      "category_l2": "Software Development Services",
+      "rule_type": "cv_review",
+      "rule_text": "Named consultant CVs or equivalent capability profiles are required above 60 consulting days"
+    },
+    {
+      "rule_id": "CR-008",
+      "category_l1": "Professional Services",
+      "category_l2": "Cybersecurity Advisory",
+      "rule_type": "certification_check",
+      "rule_text": "Cybersecurity advisory suppliers must demonstrate relevant certifications or equivalent references"
+    },
+    {
+      "rule_id": "CR-009",
+      "category_l1": "Marketing",
+      "category_l2": "Search Engine Marketing (SEM)",
+      "rule_type": "performance_baseline",
+      "rule_text": "SEM proposals should include performance baseline or benchmark assumptions"
+    },
+    {
+      "rule_id": "CR-010",
+      "category_l1": "Marketing",
+      "category_l2": "Influencer Campaign Management",
+      "rule_type": "brand_safety",
+      "rule_text": "Influencer campaigns require brand-safety review before final award"
+    }
+  ],
+  "geography_rules": [
+    {
+      "rule_id": "GR-001",
+      "country": "CH",
+      "rule_type": "sovereign_preference",
+      "rule_text": "Swiss data residency-sensitive cloud requests prefer sovereign or approved providers"
+    },
+    {
+      "rule_id": "GR-002",
+      "country": "DE",
+      "rule_type": "lead_time_constraint",
+      "rule_text": "Urgent end-user-device requests in Germany require delivery capability within requested deadline"
+    },
+    {
+      "rule_id": "GR-003",
+      "country": "FR",
+      "rule_type": "language_support",
+      "rule_text": "Business-facing services for France should support French-language delivery where relevant"
+    },
+    {
+      "rule_id": "GR-004",
+      "country": "ES",
+      "rule_type": "regional_rollout",
+      "rule_text": "Large furniture and device rollouts in Spain should evidence installation or deployment support"
+    },
+    {
+      "rule_id": "GR-005",
+      "region": "Americas",
+      "countries": [
+        "US",
+        "CA",
+        "BR",
+        "MX"
+      ],
+      "rule": "US data sovereignty: financial and healthcare data must remain in-country; verify supplier US data centre availability for sensitive workloads.",
+      "applies_to": [
+        "IT",
+        "Professional Services"
+      ]
+    },
+    {
+      "rule_id": "GR-006",
+      "region": "APAC",
+      "countries": [
+        "SG",
+        "AU",
+        "JP",
+        "IN"
+      ],
+      "rule": "APAC data localisation: India RBI, Singapore MAS, and Japan FISC guidelines apply to financial data. Verify supplier in-country data residency for regulated categories.",
+      "applies_to": [
+        "IT",
+        "Professional Services"
+      ]
+    },
+    {
+      "rule_id": "GR-007",
+      "region": "MEA",
+      "countries": [
+        "UAE",
+        "ZA"
+      ],
+      "rule": "UAE PDPL and South Africa POPIA compliance required for personal data processing. Validate supplier compliance documentation before award.",
+      "applies_to": [
+        "IT",
+        "Professional Services"
+      ]
+    },
+    {
+      "rule_id": "GR-008",
+      "region": "LATAM",
+      "countries": [
+        "BR",
+        "MX"
+      ],
+      "rule": "Brazil LGPD and Mexico LFPDPPP apply. Data processing agreements (DPA) must be in place before contract signature.",
+      "applies_to": [
+        "IT",
+        "Professional Services",
+        "Marketing"
+      ]
+    }
+  ],
+  "escalation_rules": [
+    {
+      "rule_id": "ER-001",
+      "trigger": "missing_required_information",
+      "action": "escalate",
+      "escalate_to": "Requester Clarification"
+    },
+    {
+      "rule_id": "ER-002",
+      "trigger": "preferred_supplier_restricted",
+      "action": "escalate",
+      "escalate_to": "Procurement Manager"
+    },
+    {
+      "rule_id": "ER-003",
+      "trigger": "value_exceeds_threshold",
+      "action": "escalate",
+      "escalate_to": "Head of Strategic Sourcing"
+    },
+    {
+      "rule_id": "ER-004",
+      "trigger": "no_compliant_supplier_found",
+      "action": "escalate",
+      "escalate_to": "Head of Category"
+    },
+    {
+      "rule_id": "ER-005",
+      "trigger": "data_residency_constraint_conflict",
+      "action": "escalate",
+      "escalate_to": "Security and Compliance Review"
+    },
+    {
+      "rule_id": "ER-006",
+      "trigger": "single_supplier_capacity_risk",
+      "action": "escalate",
+      "escalate_to": "Sourcing Excellence Lead"
+    },
+    {
+      "rule_id": "ER-007",
+      "trigger": "brand_safety_review_needed",
+      "action": "escalate",
+      "escalate_to": "Marketing Governance Lead"
+    },
+    {
+      "rule_id": "ER-008",
+      "trigger": "Supplier not registered or sanctioned-screened in delivery country",
+      "action": "Escalate to Regional Compliance Lead before award",
+      "escalation_target": "Regional Compliance Lead",
+      "applies_to_currencies": [
+        "USD"
+      ]
+    }
+  ]
+}
