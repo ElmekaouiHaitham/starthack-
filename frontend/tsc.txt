@@ -1,0 +1,4 @@
+﻿src/lib/data.ts(279,66): error TS2339: Property 'toLocaleString' does not exist on type 'never'.
+src/lib/data.ts(291,112): error TS2339: Property 'toLocaleString' does not exist on type 'never'.
+src/lib/data.ts(331,81): error TS2339: Property 'toLocaleString' does not exist on type 'never'.
+src/lib/data.ts(382,206): error TS2339: Property 'toLocaleString' does not exist on type 'never'.

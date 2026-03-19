@@ -17,3 +17,8 @@ pandas
 # Utilities
 ipykernel  # To run notebooks
 tqdm       # For progress bars
+
+# API Server
+fastapi
+uvicorn[standard]
+python-multipart

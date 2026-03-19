@@ -22,5 +22,32 @@
       "key_constraints": []
     },
     "contradictions": []
+  },
+  "REQ-WEB-001": {
+    "request_id": "REQ-WEB-001",
+    "cache_hit": false,
+    "processing_notes": [],
+    "extraction": {
+      "detected_language": "en",
+      "english_translation": null,
+      "qty_primary": 500.0,
+      "qty_primary_unit": "laptops",
+      "qty_total_rollout": null,
+      "qty_ambiguity_note": null,
+      "budget_extracted": null,
+      "budget_currency": null,
+      "preferred_supplier_in_text": null,
+      "policy_refusal": null,
+      "spec_mentioned": null,
+      "spec_implies_higher_cost": false,
+      "esg_signal_in_text": false,
+      "data_residency_signal_in_text": false,
+      "urgency_level": "standard",
+      "key_constraints": [
+        "for engineering team",
+        "by June 2026"
+      ]
+    },
+    "contradictions": []
   }
 }
