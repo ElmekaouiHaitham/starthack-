@@ -1,0 +1,12 @@
+{
+  "rationale_REQ-000003": {
+    "supplier_notes": {
+      "Azure Enterprise": "Rank 1 supplier achieved the highest overall score (0.8822) based on the lowest risk score (12) and a quality score of 89.",
+      "OVHcloud Enterprise": "The incumbent supplier is the lowest cost option at 1,188,000.0 EUR and has the highest ESG score (82), but ranked second due to a lower quality score (76).",
+      "Google Cloud Europe": "This supplier's rank is driven by a higher risk score (21) and a total cost of 1,267,200.0 EUR, despite a quality score of 89."
+    },
+    "excluded_summary": "No suppliers were excluded from the shortlist.",
+    "recommendation_reason": "Recommendation is to proceed with an award to the rank 1 supplier, Azure Enterprise. This decision is conditional upon securing approval from the 'Head of Strategic Sourcing' for the contract value of EUR 1,320,000.00, as required by approval tier AT-004 and noted in escalation ER-003.",
+    "preferred_supplier_rationale": null
+  }
+}

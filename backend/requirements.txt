@@ -4,6 +4,7 @@ langchain>=0.1.0
 langchain-google-genai
 langgraph
 python-dotenv
+google-genai
 
 # Vector Store & Embeddings
 sentence-transformers

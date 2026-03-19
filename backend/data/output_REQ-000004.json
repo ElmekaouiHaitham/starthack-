@@ -1,0 +1,331 @@
+{
+  "request_id": "REQ-000004",
+  "processed_at": "2026-03-19T12:25:42.993482Z",
+  "request_interpretation": {
+    "category_l1": "IT",
+    "category_l2": "Docking Stations",
+    "quantity": 240,
+    "unit_of_measure": "device",
+    "budget_amount": 25199.55,
+    "currency": "EUR",
+    "origin_country": "DE",
+    "delivery_countries": [
+      "DE"
+    ],
+    "delivery_region": "EU",
+    "required_by_date": "2026-03-20",
+    "days_until_required": 6,
+    "data_residency_required": false,
+    "esg_requirement": false,
+    "preferred_supplier_stated": "Dell Enterprise Europe",
+    "incumbent_supplier": "Bechtle Workplace Solutions",
+    "expedited_delivery_required": true
+  },
+  "validation": {
+    "completeness": "pass",
+    "missing_fields": [],
+    "preferred_supplier_status": {
+      "supplier": "Dell Enterprise Europe",
+      "supplier_id": "SUP-0001",
+      "status": "eligible",
+      "is_on_preferred_list": true,
+      "note": "Preferred status confirmed \u2014 included in shortlist. Preferred status is not a mandate; shortlist ranked on merit."
+    }
+  },
+  "policy_evaluation": {
+    "approval_threshold": {
+      "tier_id": "AT-002",
+      "threshold_currency": "EUR",
+      "effective_contract_value": 38568.0,
+      "request_currency": "EUR",
+      "fx_conversion_notes": "",
+      "quotes_required": 2,
+      "fast_track_applied": false,
+      "approvers": [
+        "business",
+        "procurement"
+      ],
+      "deviation_approval": [
+        "Procurement Manager"
+      ]
+    },
+    "category_rules_applied": [],
+    "geography_rules_applied": [
+      {
+        "rule_id": "GR-002",
+        "rule_type": "lead_time_constraint",
+        "applies_to_countries": [
+          "DE"
+        ],
+        "rule_text": "Urgent end-user-device requests in Germany require delivery capability within requested deadline"
+      }
+    ]
+  },
+  "supplier_shortlist": [
+    {
+      "supplier_id": "SUP-0007",
+      "supplier_name": "Bechtle Workplace Solutions",
+      "preferred": true,
+      "incumbent": true,
+      "pricing_tier": "100\u2013499",
+      "moq": 100,
+      "unit_price": 160.7,
+      "unit_price_standard": 148.8,
+      "unit_price_expedited": 160.7,
+      "pricing_currency": "EUR",
+      "total_price": 38568.0,
+      "total_price_in_req_currency": 38568.0,
+      "req_currency": "EUR",
+      "fx_applied": false,
+      "fx_rate": null,
+      "expedited_used": true,
+      "standard_lead_time_days": 26,
+      "expedited_lead_time_days": 18,
+      "lead_time_days": 18,
+      "lead_time_feasible": false,
+      "lead_time_note": "Expedited lead time 18d exceeds 6d available.",
+      "budget_sufficient": false,
+      "budget_note": "Total EUR 38,568.00 (\u2248 EUR 38,568.00) exceeds budget EUR 25,199.55 by EUR 13,368.45.",
+      "quality_score": 82,
+      "risk_score": 19,
+      "esg_score": 72,
+      "capacity_per_month": 11000,
+      "capacity_flag": false,
+      "data_residency_supported": true,
+      "policy_compliant": true,
+      "score": 0.3187,
+      "rank": 1,
+      "score_weights": {
+        "price": 0.634,
+        "quality": 0.1221,
+        "risk": 0.0919,
+        "esg": 0.0121,
+        "lead_time": 0.0099,
+        "preferred": 0.08,
+        "incumbent": 0.05
+      },
+      "savings_pct_vs_budget": 0.0,
+      "recommendation_note": "Rank 1: Preferred supplier; incumbent; total 38568.0 EUR; lead time 18d infeasible; over budget."
+    },
+    {
+      "supplier_id": "SUP-0001",
+      "supplier_name": "Dell Enterprise Europe",
+      "preferred": true,
+      "incumbent": false,
+      "pricing_tier": "100\u2013499",
+      "moq": 100,
+      "unit_price": 167.4,
+      "unit_price_standard": 155.0,
+      "unit_price_expedited": 167.4,
+      "pricing_currency": "EUR",
+      "total_price": 40176.0,
+      "total_price_in_req_currency": 40176.0,
+      "req_currency": "EUR",
+      "fx_applied": false,
+      "fx_rate": null,
+      "expedited_used": true,
+      "standard_lead_time_days": 22,
+      "expedited_lead_time_days": 17,
+      "lead_time_days": 17,
+      "lead_time_feasible": false,
+      "lead_time_note": "Expedited lead time 17d exceeds 6d available.",
+      "budget_sufficient": false,
+      "budget_note": "Total EUR 40,176.00 (\u2248 EUR 40,176.00) exceeds budget EUR 25,199.55 by EUR 14,976.45.",
+      "quality_score": 85,
+      "risk_score": 15,
+      "esg_score": 73,
+      "capacity_per_month": 18000,
+      "capacity_flag": false,
+      "data_residency_supported": true,
+      "policy_compliant": true,
+      "score": 0.2764,
+      "rank": 2,
+      "score_weights": {
+        "price": 0.634,
+        "quality": 0.1221,
+        "risk": 0.0919,
+        "esg": 0.0121,
+        "lead_time": 0.0099,
+        "preferred": 0.08,
+        "incumbent": 0.05
+      },
+      "savings_pct_vs_budget": 0.0,
+      "recommendation_note": "Rank 2: Preferred supplier; total 40176.0 EUR; lead time 17d infeasible; over budget."
+    },
+    {
+      "supplier_id": "SUP-0002",
+      "supplier_name": "HP Enterprise Devices",
+      "preferred": true,
+      "incumbent": false,
+      "pricing_tier": "100\u2013499",
+      "moq": 100,
+      "unit_price": 165.73,
+      "unit_price_standard": 153.45,
+      "unit_price_expedited": 165.73,
+      "pricing_currency": "EUR",
+      "total_price": 39775.2,
+      "total_price_in_req_currency": 39775.2,
+      "req_currency": "EUR",
+      "fx_applied": false,
+      "fx_rate": null,
+      "expedited_used": true,
+      "standard_lead_time_days": 23,
+      "expedited_lead_time_days": 19,
+      "lead_time_days": 19,
+      "lead_time_feasible": false,
+      "lead_time_note": "Expedited lead time 19d exceeds 6d available.",
+      "budget_sufficient": false,
+      "budget_note": "Total EUR 39,775.20 (\u2248 EUR 39,775.20) exceeds budget EUR 25,199.55 by EUR 14,575.65.",
+      "quality_score": 83,
+      "risk_score": 26,
+      "esg_score": 66,
+      "capacity_per_month": 16000,
+      "capacity_flag": false,
+      "data_residency_supported": false,
+      "policy_compliant": true,
+      "score": 0.2626,
+      "rank": 3,
+      "score_weights": {
+        "price": 0.634,
+        "quality": 0.1221,
+        "risk": 0.0919,
+        "esg": 0.0121,
+        "lead_time": 0.0099,
+        "preferred": 0.08,
+        "incumbent": 0.05
+      },
+      "savings_pct_vs_budget": 0.0,
+      "recommendation_note": "Rank 3: Preferred supplier; total 39775.2 EUR; lead time 19d infeasible; over budget."
+    },
+    {
+      "supplier_id": "SUP-0008",
+      "supplier_name": "Computacenter Devices",
+      "preferred": false,
+      "incumbent": false,
+      "pricing_tier": "100\u2013499",
+      "moq": 100,
+      "unit_price": 159.03,
+      "unit_price_standard": 147.25,
+      "unit_price_expedited": 159.03,
+      "pricing_currency": "EUR",
+      "total_price": 38167.2,
+      "total_price_in_req_currency": 38167.2,
+      "req_currency": "EUR",
+      "fx_applied": false,
+      "fx_rate": null,
+      "expedited_used": true,
+      "standard_lead_time_days": 24,
+      "expedited_lead_time_days": 18,
+      "lead_time_days": 18,
+      "lead_time_feasible": false,
+      "lead_time_note": "Expedited lead time 18d exceeds 6d available.",
+      "budget_sufficient": false,
+      "budget_note": "Total EUR 38,167.20 (\u2248 EUR 38,167.20) exceeds budget EUR 25,199.55 by EUR 12,967.65.",
+      "quality_score": 84,
+      "risk_score": 34,
+      "esg_score": 62,
+      "capacity_per_month": 14000,
+      "capacity_flag": false,
+      "data_residency_supported": true,
+      "policy_compliant": true,
+      "score": 0.1762,
+      "rank": 4,
+      "score_weights": {
+        "price": 0.634,
+        "quality": 0.1221,
+        "risk": 0.0919,
+        "esg": 0.0121,
+        "lead_time": 0.0099,
+        "preferred": 0.08,
+        "incumbent": 0.05
+      },
+      "savings_pct_vs_budget": 0.0,
+      "recommendation_note": "Rank 4: total 38167.2 EUR; lead time 18d infeasible; over budget."
+    }
+  ],
+  "suppliers_excluded": [],
+  "escalations": [
+    {
+      "escalation_id": "ESC-001",
+      "rule": "ER-004",
+      "trigger": "Required delivery in 6 days. All expedited lead times exceed this. Shortest available: 17 days.",
+      "escalate_to": "Head of Category",
+      "blocking": true,
+      "sub_type": "lead_time_infeasible"
+    },
+    {
+      "escalation_id": "ESC-002",
+      "rule": "ER-001",
+      "trigger": "Budget EUR 25,199.55 is insufficient. Minimum feasible total: EUR 38,167.20. Shortfall: EUR 12,967.65.",
+      "escalate_to": "Requester Clarification",
+      "blocking": true,
+      "sub_type": "budget_insufficient",
+      "minimum_budget_required": 38167.2,
+      "currency": "EUR"
+    }
+  ],
+  "recommendation": {
+    "status": "cannot_proceed",
+    "shortlist_count": 4,
+    "quotes_required": 2,
+    "top_supplier": "Bechtle Workplace Solutions",
+    "top_supplier_total": 38568.0,
+    "all_infeasible_lead_time": true,
+    "all_over_budget": true,
+    "reason": "Cannot proceed: Required delivery in 6 days. All expedited lead times exceed this. Shortest avai | Budget EUR 25,199.55 is insufficient. Minimum feasible total: EUR 38,167.20. Sho"
+  },
+  "audit_trail": {
+    "policies_checked": [
+      "AT-002",
+      "GR-002"
+    ],
+    "supplier_ids_evaluated": [
+      "SUP-0001",
+      "SUP-0002",
+      "SUP-0007",
+      "SUP-0008"
+    ],
+    "pricing_region_used": "EU",
+    "expedited_evaluated": true,
+    "fx_rates_used": {
+      "EUR": 1.0,
+      "CHF": 1.04,
+      "USD": 0.92
+    },
+    "data_sources_used": [
+      "requests.json",
+      "merged_v2.csv",
+      "policies.json"
+    ],
+    "historical_context": {
+      "has_direct_history": true,
+      "prior_awards": [
+        {
+          "award_id": "AWD-000009",
+          "supplier_name": "Dell Enterprise Europe",
+          "total_value": 37200.0,
+          "currency": "EUR",
+          "lead_time_days": 22,
+          "savings_pct": 4.7,
+          "escalation_required": true
+        }
+      ],
+      "note": "Award date is decision date, not delivery date."
+    },
+    "scoring_weights_used": {
+      "price": 0.634,
+      "quality": 0.1221,
+      "risk": 0.0919,
+      "esg": 0.0121,
+      "lead_time": 0.0099,
+      "preferred": 0.08,
+      "incumbent": 0.05
+    }
+  },
+  "_pipeline": {
+    "nlp_enabled": true,
+    "rationale_enabled": true,
+    "calibration_auc": 0.991,
+    "pipeline_version": "v1.0"
+  }
+}
