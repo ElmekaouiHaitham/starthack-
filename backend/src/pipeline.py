@@ -212,6 +212,77 @@ class Pipeline:
         return final_output
 
     # ─────────────────────────────────────────────────────────────────────────
+    # SINGLE REQUEST STREAMING
+    # ─────────────────────────────────────────────────────────────────────────
+
+    def run_stream(self, request: dict):
+        """
+        Process request and yield thinking steps followed by final result.
+        """
+        import time
+        req_id = request.get("request_id", "unknown")
+        
+        yield {"type": "step", "title": "Request Received", "description": f"Looking up details for your request {req_id}"}
+        time.sleep(0.5)
+
+        # ── Layer 1: NLP extraction ──────────────────────────────────────────
+        yield {"type": "step", "title": "Reading the Request", "description": "I'm reading your request and figuring out exactly what you need"}
+        if self.enable_nlp and self.nlp_extractor:
+            try:
+                enriched = self.nlp_extractor.enrich(
+                    request, force_refresh=self.force_refresh
+                )
+                working_request = apply_nlp_to_rule_engine_input(enriched)
+                yield {"type": "step", "title": "Understanding Complete", "description": "I have successfully pulled out all the required details from your request"}
+            except Exception as e:
+                print(f"    NLP failed for {req_id}: {e} — using raw fields")
+                working_request = request
+                yield {"type": "step", "title": "Reading Failed", "description": f"I had a little trouble understanding the text: {e}. I'll just use the form fields provided"}
+        else:
+            working_request = request
+            yield {"type": "step", "title": "Reading Skipped", "description": "I'll skip reading the text since that's turned off right now"}
+
+        # ── Layer 2: Rule engine ─────────────────────────────────────────────
+        yield {"type": "step", "title": "Checking Policies", "description": "Looking at company rules to see which suppliers we can use and what approvals are needed"}
+        engine_output = self.engine.process(working_request)
+        yield {"type": "step", "title": "Policy Check Complete", "description": f"I found {len(engine_output.get('supplier_shortlist', []))} suppliers that match the rules"}
+        time.sleep(0.5)
+
+        # ── Layer 3: Re-score with calibrated weights ────────────────────────
+        yield {"type": "step", "title": "Finding Best Options", "description": "Comparing the available suppliers to figure out the best match for this request"}
+        engine_output = self._apply_calibrated_scores(engine_output, working_request)
+        yield {"type": "step", "title": "Ranking Complete", "description": "I've ranked the best suppliers for you"}
+        time.sleep(0.5)
+
+        # ── Layer 4: Rationale generation ────────────────────────────────────
+        yield {"type": "step", "title": "Writing Recommendation", "description": "Putting together a clear explanation of my final decision for your review"}
+        if self.enable_rationale and self.rationale_gen:
+            try:
+                final_output = self.rationale_gen.add_rationale(
+                    engine_output, force_refresh=self.force_refresh
+                )
+                yield {"type": "step", "title": "Recommendation Complete", "description": "I have finished writing the final recommendation"}
+            except Exception as e:
+                print(f"    Rationale failed for {req_id}: {e} — using template")
+                rationale = _template_fallback(engine_output, str(e))
+                final_output = _merge_rationale(engine_output, rationale)
+                yield {"type": "step", "title": "Recommendation Fallback", "description": "I've used a standard template for the recommendation due to a small error"}
+        else:
+            rationale = _template_fallback(engine_output, "rationale layer disabled")
+            final_output = _merge_rationale(engine_output, rationale)
+            yield {"type": "step", "title": "Recommendation Skipped", "description": "Skipping the custom written recommendation and using a standard template instead"}
+
+        # Add pipeline metadata
+        final_output["_pipeline"] = {
+            "nlp_enabled":       self.enable_nlp,
+            "rationale_enabled": self.enable_rationale,
+            "calibration_auc":   round(self.calibrator._report.cv_auc_mean, 3),
+            "pipeline_version":  "v1.0",
+        }
+
+        yield {"type": "result", "data": final_output}
+
+    # ─────────────────────────────────────────────────────────────────────────
     # CALIBRATED RESCORING
     # ─────────────────────────────────────────────────────────────────────────
 

@@ -23,6 +23,7 @@ from pathlib import Path
 
 import uvicorn
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile
+from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 # ── add src/ to sys.path so pipeline imports work ──────────────────────────
@@ -142,6 +143,34 @@ async def analyze(request: Request, file: UploadFile | None = File(default=None)
         )
 
     return _run_pipeline(request.app.state, request_dict)
+
+@app.post("/analyze-stream", tags=["pipeline"])
+async def analyze_stream(request: Request, file: UploadFile | None = File(default=None)):
+    """
+    Analyze a single procurement request, streaming the execution steps back to the client.
+    """
+    content_type = request.headers.get("content-type", "")
+
+    if file is not None:
+        raw = await file.read()
+        request_dict = _parse_json_bytes(raw)
+    elif "application/json" in content_type:
+        raw = await request.body()
+        request_dict = _parse_json_bytes(raw)
+    else:
+        raise HTTPException(
+            status_code=415,
+            detail="Unsupported content type. Use application/json or multipart/form-data with a .json file.",
+        )
+
+    async def event_generator():
+        try:
+            for step in request.app.state.pipeline.run_stream(request_dict):
+                yield f"data: {json.dumps(step)}\n\n"
+        except Exception as exc:
+            yield f"data: {json.dumps({'type': 'error', 'detail': str(exc)})}\n\n"
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
 
 
 # ══════════════════════════════════════════════════════════════════════════════

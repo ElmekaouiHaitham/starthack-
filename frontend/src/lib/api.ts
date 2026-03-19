@@ -30,6 +30,33 @@ export async function analyzeFileFromBackend(file: File): Promise<unknown> {
   return res.json();
 }
 
+export async function analyzeStreamRequestFromBackend(requestDict: object): Promise<Response> {
+  const res = await fetch(`${BASE_URL}/analyze-stream`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(requestDict),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: res.statusText }));
+    throw new Error((err as { detail?: string }).detail ?? `HTTP ${res.status}`);
+  }
+  return res;
+}
+
+export async function analyzeStreamFileFromBackend(file: File): Promise<Response> {
+  const form = new FormData();
+  form.append('file', file);
+  const res = await fetch(`${BASE_URL}/analyze-stream`, {
+    method: 'POST',
+    body: form,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: res.statusText }));
+    throw new Error((err as { detail?: string }).detail ?? `HTTP ${res.status}`);
+  }
+  return res;
+}
+
 export async function checkBackendHealth(): Promise<boolean> {
   try {
     const res = await fetch(`${BASE_URL}/health`, { method: 'GET' });

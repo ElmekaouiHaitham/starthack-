@@ -446,7 +446,73 @@ const STEPS = [
   'Generating audit-ready recommendation',
 ];
 
-function LoadingView({ activeStep }: { activeStep: number }) {
+function AIThinkingSteps({ steps, expandedInitially = false, isComplete = false }: { steps: { title: string, description: string }[], expandedInitially?: boolean, isComplete?: boolean }) {
+  const [open, setOpen] = useState(expandedInitially);
+  const [expandedSteps, setExpandedSteps] = useState<Record<number, boolean>>({});
+
+  const toggleStep = (e: React.MouseEvent, i: number) => {
+    e.stopPropagation();
+    setExpandedSteps(prev => ({ ...prev, [i]: !prev[i] }));
+  };
+
+  if (!steps || steps.length === 0) return null;
+
+  return (
+    <div style={{ marginBottom: 16, borderRadius: 6, border: '1px solid #E2E8F0', background: '#fff', overflow: 'hidden', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
+      <div 
+        onClick={() => setOpen(!open)}
+        style={{ padding: '10px 14px', background: '#F8FAFC', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', userSelect: 'none' }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+           {isComplete ? (
+             <div style={{ width: 14, height: 14, background: '#059669', borderRadius: '50%', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700 }}>✓</div>
+           ) : (
+             <div style={{ width: 14, height: 14, border: '2px solid #6366F1', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite', opacity: open ? 1 : 0.5 }} />
+           )}
+           <span style={{ fontSize: 12, fontWeight: 700, color: '#374151', letterSpacing: '0.02em' }}>Agent reasoning process</span>
+        </div>
+        <div style={{ fontSize: 10, color: '#94A3B8', fontWeight: 600 }}>{open ? 'HIDE' : 'SHOW'} ▼</div>
+      </div>
+      
+      {open && (
+        <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 14, background: '#FAFAFA' }}>
+          {steps.map((step, i) => {
+            const isLast = i === steps.length - 1;
+            const isStepExpanded = expandedSteps[i] ?? (!isComplete && isLast);
+
+            return (
+              <div key={i} style={{ display: 'flex', gap: 12 }}>
+                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: 22, flexShrink: 0 }}>
+                    {isComplete || !isLast ? (
+                      <div style={{ width: 22, height: 22, borderRadius: '50%', background: '#059669', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700 }}>✓</div>
+                    ) : (
+                      <div style={{ width: 22, height: 22, borderRadius: '50%', background: '#EEF2FF', color: '#6366F1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700 }}>{i + 1}</div>
+                    )}
+                    {i < steps.length - 1 && <div style={{ width: 2, flex: 1, background: '#E2E8F0', marginTop: 6 }} />}
+                 </div>
+                 <div style={{ paddingBottom: i < steps.length - 1 ? 8 : 0, flex: 1, paddingTop: 1 }}>
+                   <div 
+                     onClick={(e) => toggleStep(e, i)}
+                     style={{ fontSize: 12.5, fontWeight: 700, color: '#1E293B', marginBottom: isStepExpanded ? 3 : 0, cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                   >
+                     {step.title}
+                     <span style={{ fontSize: 9, color: '#94A3B8' }}>{isStepExpanded ? '▲' : '▼'}</span>
+                   </div>
+                   {isStepExpanded && (
+                     <div style={{ fontSize: 11.5, color: '#475569', lineHeight: 1.5, whiteSpace: 'pre-wrap', marginTop: 4 }}>{step.description}</div>
+                   )}
+                 </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function LoadingView({ activeStep, thinkingSteps }: { activeStep: number, thinkingSteps?: {title: string, description: string}[] }) {
+  const hasThinkingSteps = thinkingSteps && thinkingSteps.length > 0;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '60px 20px', gap: 28 }}>
       {/* Spinner — keeps ChainIQ red since it's a brand element in motion, not a status */}
@@ -468,25 +534,31 @@ function LoadingView({ activeStep }: { activeStep: number }) {
         ARIA PROCESSING
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 9, width: '100%', maxWidth: 320 }}>
-        {STEPS.map((step, i) => {
-          const done = i < activeStep;
-          const active = i === activeStep;
-          return (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 9, fontSize: 12, color: done ? '#059669' : active ? '#1E293B' : '#94A3B8', transition: 'all 0.3s' }}>
-              <div style={{
-                width: 7, height: 7, borderRadius: '50%', flexShrink: 0,
-                background: done ? '#059669' : active ? '#1E293B' : '#E2E8F0',
-                fontSize: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff',
-                animation: active ? 'pulse-dot 1s ease-in-out infinite' : 'none',
-              }}>
-                {done ? '✓' : ''}
+      {hasThinkingSteps ? (
+        <div style={{ width: '100%', maxWidth: 420 }}>
+          <AIThinkingSteps steps={thinkingSteps!} expandedInitially={true} isComplete={false} />
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 9, width: '100%', maxWidth: 320 }}>
+          {STEPS.map((step, i) => {
+            const done = i < activeStep;
+            const active = i === activeStep;
+            return (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 9, fontSize: 12, color: done ? '#059669' : active ? '#1E293B' : '#94A3B8', transition: 'all 0.3s' }}>
+                <div style={{
+                  width: 7, height: 7, borderRadius: '50%', flexShrink: 0,
+                  background: done ? '#059669' : active ? '#1E293B' : '#E2E8F0',
+                  fontSize: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff',
+                  animation: active ? 'pulse-dot 1s ease-in-out infinite' : 'none',
+                }}>
+                  {done ? '✓' : ''}
+                </div>
+                {step}
               </div>
-              {step}
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
       <style>{`@keyframes spin { to { transform: rotate(360deg); } } @keyframes pulse-dot { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }`}</style>
     </div>
   );
@@ -885,6 +957,390 @@ function BackendDetailsCard({ b }: { b: BackendResult }) {
   );
 }
 
+// ── Audit Document Generator ─────────────────────────────────────────────────
+function generateAuditHTML(result: AnalysisResult, backendRaw: BackendResult | null | undefined, thinkingSteps?: {title: string, description: string}[]): string {
+  const now = new Date().toISOString().replace('T', ' ').split('.')[0] + ' UTC';
+  const req = result.request_parsed;
+  const rec = result.recommendation;
+
+  const statusColor = (s: string) =>
+    s === 'pass' || s === 'compliant' ? '#059669'
+    : s === 'warning' ? '#B45309'
+    : s === 'fail' || s === 'non_compliant' ? '#DC2626' : '#1D4ED8';
+
+  const decisionColor = rec.decision === 'auto_approve' ? '#059669' : rec.decision === 'soft_escalate' ? '#B45309' : '#DC2626';
+  const decisionLabel = rec.decision === 'auto_approve' ? 'AUTO-APPROVED' : rec.decision === 'soft_escalate' ? 'SOFT ESCALATION' : 'HARD ESCALATION';
+
+  const suppliersRows = result.suppliers.map((s, i) => `
+    <tr style="background:${i % 2 === 0 ? '#fff' : '#F8FAFC'}">
+      <td style="padding:8px 10px;border-bottom:1px solid #E2E8F0;font-weight:700">${s.rank ?? i + 1}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #E2E8F0;font-weight:600">${h(s.supplier_name)}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #E2E8F0">${s.unit_price != null ? `${Number(s.unit_price).toLocaleString()} ${h(s.pricing_currency ?? '')}` : '—'}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #E2E8F0">${s.total_price != null ? `${Number(s.total_price).toLocaleString()} ${h(s.pricing_currency ?? '')}` : '—'}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #E2E8F0">${s.lead_time_days != null ? `${s.lead_time_days} days` : '—'}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #E2E8F0">${s.quality_score != null ? `${s.quality_score}/100` : '—'}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #E2E8F0">${s.esg_score != null ? `${s.esg_score}/100` : '—'}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #E2E8F0">${s.risk_score != null ? `${s.risk_score}/100` : '—'}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #E2E8F0"><span style="color:${statusColor(s.policy_compliant ? 'compliant' : 'non_compliant')};font-weight:700;text-transform:uppercase;font-size:11px">${s.policy_compliant ? 'COMPLIANT' : 'NON-COMPLIANT'}</span></td>
+      <td style="padding:8px 10px;border-bottom:1px solid #E2E8F0;font-size:11px;max-width:200px">${h(s.recommendation_note ?? '')}</td>
+    </tr>`);
+
+  const policyRows = result.policy_evaluation.map(r => `
+    <tr>
+      <td style="padding:10px 12px;border-bottom:1px solid #E2E8F0;font-family:monospace;font-size:11px;color:#6B7280">${h(r.rule_id)}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #E2E8F0;font-weight:600">${h(r.rule_type)}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #E2E8F0"><span style="color:${statusColor(r.status)};font-weight:700;text-transform:uppercase;font-size:11px">${r.status}</span></td>
+      <td style="padding:10px 12px;border-bottom:1px solid #E2E8F0">${h(r.rule_text)}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #E2E8F0;color:#DC2626;font-size:11px">${h(r.context ?? '—')}</td>
+    </tr>`);
+
+  const escalationRows = result.escalations.length === 0
+    ? '<tr><td colspan="5" style="padding:16px;text-align:center;color:#94A3B8;font-style:italic">No escalations required</td></tr>'
+    : result.escalations.map(e => `
+    <tr>
+      <td style="padding:10px 12px;border-bottom:1px solid #E2E8F0;font-weight:600">${h(e.rule)}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #E2E8F0">${h(e.escalate_to)}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #E2E8F0"><span style="color:${statusColor(e.urgency === 'high' ? 'fail' : e.urgency === 'medium' ? 'warning' : 'pass')};font-weight:700;text-transform:uppercase;font-size:11px">${h(e.urgency)}</span></td>
+      <td style="padding:10px 12px;border-bottom:1px solid #E2E8F0">${h(e.reason)}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #E2E8F0">${h(e.action_required)}</td>
+    </tr>`).join('');
+
+  const auditRows = result.audit_log.map(entry => `
+    <tr>
+      <td style="padding:8px 10px;border-bottom:1px solid #E2E8F0;font-family:monospace;font-size:10px;color:#6B7280;white-space:nowrap">${h((entry.timestamp || '').replace('T', ' ').split('.')[0])}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #E2E8F0;font-weight:700;font-size:11px">${h(entry.layer)}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #E2E8F0">${h(entry.action)}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #E2E8F0;font-size:11px;color:#475569">${h(entry.details)}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #E2E8F0"><span style="color:${statusColor(entry.result)};font-weight:700;text-transform:uppercase;font-size:11px">${h(entry.result)}</span></td>
+    </tr>`);
+
+  const thinkingRows = !thinkingSteps?.length ? '' : `
+  <div class="section">
+    <div class="section-title">AI Reasoning Process</div>
+    <table>
+      <thead><tr>
+        <th style="width:30px">#</th>
+        <th>Step</th>
+        <th>Detail</th>
+      </tr></thead>
+      <tbody>
+        ${thinkingSteps.map((s, i) => `
+          <tr>
+            <td style="padding:8px 10px;border-bottom:1px solid #E2E8F0;color:#6B7280;text-align:center">${i + 1}</td>
+            <td style="padding:8px 10px;border-bottom:1px solid #E2E8F0;font-weight:600">${h(s.title)}</td>
+            <td style="padding:8px 10px;border-bottom:1px solid #E2E8F0;color:#475569">${h(s.description)}</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>`;
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ARIA Procurement Audit Report</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; font-size: 13px; color: #0F172A; background: #fff; }
+    .page { max-width: 1100px; margin: 0 auto; padding: 40px 50px; }
+    .header { border-bottom: 3px solid #E30613; padding-bottom: 24px; margin-bottom: 32px; }
+    .header-top { display: flex; justify-content: space-between; align-items: flex-start; }
+    .logo { font-size: 22px; font-weight: 800; color: #0F172A; letter-spacing: -0.5px; }
+    .logo span { color: #E30613; }
+    .meta { font-size: 11px; color: #94A3B8; text-align: right; line-height: 1.7; }
+    .doc-title { font-size: 28px; font-weight: 800; color: #0F172A; margin-top: 16px; }
+    .doc-subtitle { font-size: 13px; color: #64748B; margin-top: 4px; }
+    .decision-banner { border-radius: 6px; padding: 18px 22px; margin-bottom: 32px; display: flex; align-items: center; justify-content: space-between; }
+    .decision-label { font-size: 20px; font-weight: 800; }
+    .decision-meta { font-size: 12px; opacity: 0.85; margin-top: 4px; }
+    .decision-confidence { font-size: 32px; font-weight: 800; }
+    .section { margin-bottom: 36px; }
+    .section-title { font-size: 14px; font-weight: 700; color: #0F172A; text-transform: uppercase; letter-spacing: 0.08em; padding-bottom: 8px; border-bottom: 2px solid #E2E8F0; margin-bottom: 16px; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    thead tr { background: #F8FAFC; }
+    th { padding: 9px 10px; text-align: left; font-size: 10px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: #6B7280; border-bottom: 2px solid #E2E8F0; }
+    .kv-grid { display: grid; grid-template-columns: 200px 1fr; gap: 0; border: 1px solid #E2E8F0; border-radius: 5px; overflow: hidden; margin-bottom: 16px; }
+    .kv-row { display: contents; }
+    .kv-label { padding: 8px 12px; background: #F8FAFC; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: #6B7280; border-bottom: 1px solid #E2E8F0; }
+    .kv-value { padding: 8px 12px; font-size: 12px; font-weight: 500; color: #0F172A; border-bottom: 1px solid #E2E8F0; }
+    .next-steps li { padding: 6px 0; border-bottom: 1px solid #F1F5F9; font-size: 12px; color: #374151; }
+    .reasoning-box { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 5px; padding: 16px 18px; font-size: 12.5px; line-height: 1.7; color: #374151; margin-bottom: 16px; }
+    .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #E2E8F0; display: flex; justify-content: space-between; font-size: 10px; color: #94A3B8; }
+    @media print { body { background: #fff; } .page { padding: 20px 30px; } }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="logo">Chain<span>IQ</span></div>
+        <div style="font-size:11px;color:#94A3B8;margin-top:2px">AI-Driven Procurement Services</div>
+      </div>
+      <div class="meta">
+        <div><strong>Document Type:</strong> Procurement Audit Report</div>
+        <div><strong>Generated:</strong> ${h(now)}</div>
+        <div><strong>Powered by:</strong> ARIA Pipeline v1.0</div>
+        <div><strong>Classification:</strong> CONFIDENTIAL</div>
+      </div>
+    </div>
+    <div class="doc-title">Audit-Ready Autonomous Sourcing Report</div>
+    <div class="doc-subtitle">${h(req.item || 'Purchase Request')} — ${h(req.category_l1 || '')}${req.category_l2 ? ' / ' + h(req.category_l2) : ''}</div>
+  </div>
+
+  <!-- Decision Banner -->
+  <div class="decision-banner" style="background:${decisionColor}10;border:2px solid ${decisionColor}30">
+    <div>
+      <div class="decision-label" style="color:${decisionColor}">${decisionLabel}</div>
+      <div class="decision-meta" style="color:${decisionColor}">Recommended Supplier: <strong>${h(rec.top_supplier ?? '—')}</strong> · Confidence: ${h(rec.confidence?.toUpperCase() ?? '—')} · Quotes Required: ${rec.quotes_required ?? 1}</div>
+    </div>
+    <div class="decision-confidence" style="color:${decisionColor}">${rec.confidence_score ?? '—'}%</div>
+  </div>
+
+  <!-- 1. Request Details -->
+  <div class="section">
+    <div class="section-title">1. Purchase Request Details</div>
+    <div class="kv-grid">
+      <div class="kv-row"><div class="kv-label">Item / Service</div><div class="kv-value">${h(req.item)}</div></div>
+      <div class="kv-row"><div class="kv-label">Category L1</div><div class="kv-value">${h(req.category_l1 || '—')}</div></div>
+      <div class="kv-row"><div class="kv-label">Category L2</div><div class="kv-value">${h(req.category_l2 || '—')}</div></div>
+      <div class="kv-row"><div class="kv-label">Quantity</div><div class="kv-value">${req.quantity != null ? `${req.quantity} ${h(req.unit)}` : '—'}</div></div>
+      <div class="kv-row"><div class="kv-label">Budget</div><div class="kv-value">${req.budget_amount != null ? `${Number(req.budget_amount).toLocaleString()} ${h(req.currency)}` : '—'}</div></div>
+      <div class="kv-row"><div class="kv-label">Required By</div><div class="kv-value">${h(req.deadline_iso || (req.deadline_days_from_today != null ? `In ${req.deadline_days_from_today} days` : '—'))}</div></div>
+      <div class="kv-row"><div class="kv-label">Delivery Country</div><div class="kv-value">${h(req.country || '—')}</div></div>
+      <div class="kv-row"><div class="kv-label">Delivery Countries</div><div class="kv-value">${h((req.delivery_countries ?? []).join(', ') || '—')}</div></div>
+      <div class="kv-row"><div class="kv-label">Preferred Supplier</div><div class="kv-value">${h(req.preferred_supplier_mentioned ?? '—')}</div></div>
+      <div class="kv-row"><div class="kv-label">Business Unit</div><div class="kv-value">${h(req.business_unit ?? '—')}</div></div>
+      <div class="kv-row"><div class="kv-label">ESG Required</div><div class="kv-value">${req.esg_required ? 'Yes' : 'No'}</div></div>
+      <div class="kv-row"><div class="kv-label">Data Residency</div><div class="kv-value">${req.data_residency ? 'Yes' : 'No'}</div></div>
+    </div>
+    ${result.compatibility.issues.length > 0 ? `
+    <div style="margin-top:12px">
+      <div style="font-size:11px;font-weight:700;color:#B45309;margin-bottom:6px">⚠ Validation Issues</div>
+      ${result.compatibility.issues.map(i => `<div style="font-size:11px;color:#374151;padding:4px 0;border-bottom:1px solid #F1F5F9">${h(i.field)}: ${h(i.description)}</div>`).join('')}
+    </div>` : '<div style="font-size:11px;color:#059669;font-weight:600;margin-top:8px">✓ All mandatory fields validated — no issues detected</div>'}
+  </div>
+
+  <!-- 2. Policy Evaluation -->
+  <div class="section">
+    <div class="section-title">2. Policy Evaluation</div>
+    <table>
+      <thead><tr><th>Rule ID</th><th>Rule Name</th><th>Status</th><th>Outcome</th><th>Impact / Action Required</th></tr></thead>
+      <tbody>${policyRows.join('')}</tbody>
+    </table>
+  </div>
+
+  <!-- 3. Supplier Analysis -->
+  <div class="section">
+    <div class="section-title">3. Supplier Shortlist & Ranking</div>
+    <table>
+      <thead><tr><th>#</th><th>Supplier</th><th>Unit Price</th><th>Total Price</th><th>Lead Time</th><th>Quality</th><th>ESG</th><th>Risk</th><th>Status</th><th>Remarks</th></tr></thead>
+      <tbody>${suppliersRows.join('')}</tbody>
+    </table>
+  </div>
+
+  <!-- 4. Escalations -->
+  <div class="section">
+    <div class="section-title">4. Escalation Requirements</div>
+    <table>
+      <thead><tr><th>Trigger</th><th>Escalate To</th><th>Urgency</th><th>Description</th><th>Action Required</th></tr></thead>
+      <tbody>${escalationRows}</tbody>
+    </table>
+  </div>
+
+  <!-- 5. Recommendation -->
+  <div class="section">
+    <div class="section-title">5. Final Recommendation</div>
+    <div class="kv-grid">
+      <div class="kv-row"><div class="kv-label">Decision</div><div class="kv-value" style="color:${decisionColor};font-weight:700">${decisionLabel}</div></div>
+      <div class="kv-row"><div class="kv-label">Recommended Supplier</div><div class="kv-value">${h(rec.top_supplier ?? '—')}</div></div>
+      <div class="kv-row"><div class="kv-label">Confidence Level</div><div class="kv-value">${h(rec.confidence?.toUpperCase() ?? '—')} (${rec.confidence_score ?? '—'}%)</div></div>
+      <div class="kv-row"><div class="kv-label">Required Approver</div><div class="kv-value">${h(rec.required_approver ?? '—')}</div></div>
+      <div class="kv-row"><div class="kv-label">Quotes Required</div><div class="kv-value">${rec.quotes_required ?? 1}</div></div>
+      <div class="kv-row"><div class="kv-label">Estimated Total Value</div><div class="kv-value">${rec.top_supplier_total != null ? `${Number(rec.top_supplier_total).toLocaleString()} ${h(rec.minimum_budget_currency ?? '')}` : '—'}</div></div>
+    </div>
+    <div style="font-size:11px;font-weight:600;color:#374151;margin-bottom:6px">Reasoning</div>
+    <div class="reasoning-box">${h(rec.reason)}</div>
+    <div style="font-size:11px;font-weight:600;color:#374151;margin-bottom:8px">Next Steps</div>
+    <ol class="next-steps" style="padding-left:20px">
+      ${(rec.next_steps ?? []).map(s => `<li>${h(s)}</li>`).join('')}
+    </ol>
+  </div>
+
+  <!-- 6. Audit Log -->
+  <div class="section">
+    <div class="section-title">6. Pipeline Audit Log</div>
+    <table>
+      <thead><tr><th>Timestamp</th><th>Layer</th><th>Action</th><th>Details</th><th>Result</th></tr></thead>
+      <tbody>${auditRows.join('')}</tbody>
+    </table>
+  </div>
+
+  <!-- 7. AI Reasoning (optional) -->
+  ${thinkingRows}
+
+  <!-- 8. Full Backend Report -->
+  ${!backendRaw ? '' : `
+  <div class="section">
+    <div class="section-title">8. Full Backend Report (Raw Pipeline Output)</div>
+
+    <!-- Request Interpretation -->
+    <div style="font-size:12px;font-weight:700;color:#374151;margin:12px 0 8px;padding-left:4px;border-left:3px solid #6366F1">Request Interpretation</div>
+    <div class="kv-grid">
+      ${Object.entries(backendRaw.request_interpretation ?? {}).map(([k, v]) =>
+        `<div class="kv-row"><div class="kv-label">${h(k)}</div><div class="kv-value">${h(JSON.stringify(v))}</div></div>`
+      ).join('')}
+    </div>
+
+    <!-- Validation -->
+    <div style="font-size:12px;font-weight:700;color:#374151;margin:12px 0 8px;padding-left:4px;border-left:3px solid #059669">Validation</div>
+    <div class="kv-grid">
+      ${Object.entries(backendRaw.validation ?? {}).map(([k, v]) =>
+        `<div class="kv-row"><div class="kv-label">${h(k)}</div><div class="kv-value">${h(Array.isArray(v) ? v.join(', ') || 'none' : JSON.stringify(v))}</div></div>`
+      ).join('')}
+    </div>
+
+    <!-- Policy Evaluation (raw) -->
+    <div style="font-size:12px;font-weight:700;color:#374151;margin:12px 0 8px;padding-left:4px;border-left:3px solid #B45309">Policy Evaluation (raw)</div>
+    <div class="kv-grid">
+      ${backendRaw.policy_evaluation?.approval_threshold ? Object.entries(backendRaw.policy_evaluation.approval_threshold).map(([k, v]) =>
+        `<div class="kv-row"><div class="kv-label">threshold · ${h(k)}</div><div class="kv-value">${h(Array.isArray(v) ? v.join(', ') : JSON.stringify(v))}</div></div>`
+      ).join('') : '<div class="kv-row"><div class="kv-label">Approval Threshold</div><div class="kv-value">—</div></div>'}
+      ${backendRaw.policy_evaluation?.preferred_supplier ? Object.entries(backendRaw.policy_evaluation.preferred_supplier).map(([k, v]) =>
+        `<div class="kv-row"><div class="kv-label">preferred · ${h(k)}</div><div class="kv-value">${h(JSON.stringify(v))}</div></div>`
+      ).join('') : ''}
+      ${(backendRaw.policy_evaluation?.category_rules_applied ?? []).map((cr: Record<string, unknown>, i: number) =>
+        Object.entries(cr).map(([k, v]) =>
+          `<div class="kv-row"><div class="kv-label">rule ${i+1} · ${h(k)}</div><div class="kv-value">${h(JSON.stringify(v))}</div></div>`
+        ).join('')
+      ).join('')}
+    </div>
+
+    <!-- Supplier Shortlist (full detail) -->
+    <div style="font-size:12px;font-weight:700;color:#374151;margin:12px 0 8px;padding-left:4px;border-left:3px solid #059669">Supplier Shortlist — Full Detail</div>
+    ${(backendRaw.supplier_shortlist ?? []).map((s: Record<string, unknown>, i: number) => `
+      <div style="margin-bottom:12px;border:1px solid #E2E8F0;border-radius:4px;overflow:hidden">
+        <div style="background:#F8FAFC;padding:7px 12px;font-size:11px;font-weight:700;color:#374151;border-bottom:1px solid #E2E8F0">
+          #${i+1} — ${h(s.supplier_name ?? s.supplier_id ?? `Supplier ${i+1}`)}
+        </div>
+        <div class="kv-grid" style="border:none;border-radius:0;margin:0">
+          ${Object.entries(s).map(([k, v]) =>
+            `<div class="kv-row"><div class="kv-label">${h(k)}</div><div class="kv-value">${h(typeof v === 'object' ? JSON.stringify(v) : v)}</div></div>`
+          ).join('')}
+        </div>
+      </div>`).join('')}
+
+    <!-- Excluded Suppliers -->
+    ${(backendRaw.excluded_suppliers ?? []).length > 0 ? `
+    <div style="font-size:12px;font-weight:700;color:#DC2626;margin:12px 0 8px;padding-left:4px;border-left:3px solid #DC2626">Excluded Suppliers</div>
+    ${(backendRaw.excluded_suppliers ?? []).map((s: Record<string, unknown>, i: number) => `
+      <div style="margin-bottom:10px;border:1px solid #FEE2E2;border-radius:4px;overflow:hidden">
+        <div style="background:#FEF2F2;padding:7px 12px;font-size:11px;font-weight:700;color:#DC2626;border-bottom:1px solid #FEE2E2">
+          ${h(s.supplier_name ?? s.supplier_id ?? `Excluded ${i+1}`)}
+        </div>
+        <div class="kv-grid" style="border:none;border-radius:0;margin:0">
+          ${Object.entries(s).map(([k, v]) =>
+            `<div class="kv-row"><div class="kv-label">${h(k)}</div><div class="kv-value">${h(JSON.stringify(v))}</div></div>`
+          ).join('')}
+        </div>
+      </div>`).join('')}` : ''}
+
+    <!-- Escalations (raw) -->
+    ${(backendRaw.escalations ?? []).length > 0 ? `
+    <div style="font-size:12px;font-weight:700;color:#DC2626;margin:12px 0 8px;padding-left:4px;border-left:3px solid #DC2626">Escalations (raw)</div>
+    ${(backendRaw.escalations ?? []).map((e: Record<string, unknown>, i: number) => `
+      <div style="margin-bottom:10px;border:1px solid #E2E8F0;border-radius:4px;overflow:hidden">
+        <div style="background:#F8FAFC;padding:7px 12px;font-size:11px;font-weight:700;color:#374151;border-bottom:1px solid #E2E8F0">
+          ${h(e.rule ?? `ESC ${i+1}`)} → ${h(e.escalate_to ?? '?')}
+        </div>
+        <div class="kv-grid" style="border:none;border-radius:0;margin:0">
+          ${Object.entries(e).map(([k, v]) =>
+            `<div class="kv-row"><div class="kv-label">${h(k)}</div><div class="kv-value">${h(JSON.stringify(v))}</div></div>`
+          ).join('')}
+        </div>
+      </div>`).join('')}` : ''}
+
+    <!-- Recommendation (all fields) -->
+    <div style="font-size:12px;font-weight:700;color:#374151;margin:12px 0 8px;padding-left:4px;border-left:3px solid #059669">Recommendation — All Fields</div>
+    <div class="kv-grid">
+      ${Object.entries(backendRaw.recommendation ?? {}).map(([k, v]) =>
+        `<div class="kv-row"><div class="kv-label">${h(k)}</div><div class="kv-value">${h(Array.isArray(v) ? v.join(', ') : JSON.stringify(v))}</div></div>`
+      ).join('')}
+    </div>
+
+    <!-- Audit Trail (all fields) -->
+    <div style="font-size:12px;font-weight:700;color:#374151;margin:12px 0 8px;padding-left:4px;border-left:3px solid #8B5CF6">Audit Trail — All Fields</div>
+    <div class="kv-grid">
+      ${Object.entries(backendRaw.audit_trail ?? {}).map(([k, v]) =>
+        `<div class="kv-row"><div class="kv-label">${h(k)}</div><div class="kv-value">${h(Array.isArray(v) ? (v as unknown[]).join(', ') || 'none' : JSON.stringify(v))}</div></div>`
+      ).join('')}
+    </div>
+
+    <!-- Pipeline Metadata -->
+    <div style="font-size:12px;font-weight:700;color:#374151;margin:12px 0 8px;padding-left:4px;border-left:3px solid #374151">Pipeline Metadata</div>
+    <div class="kv-grid">
+      ${Object.entries(backendRaw._pipeline ?? {}).map(([k, v]) =>
+        `<div class="kv-row"><div class="kv-label">${h(k)}</div><div class="kv-value">${h(JSON.stringify(v))}</div></div>`
+      ).join('')}
+    </div>
+  </div>`}
+
+  <!-- Footer -->
+  <div class="footer">
+    <div>ChainIQ · ARIA Autonomous Sourcing Agent · Pipeline v1.0</div>
+    <div>Generated: ${h(now)} · CONFIDENTIAL — For internal procurement use only</div>
+  </div>
+
+</div>
+</body>
+</html>`;
+}
+
+function DownloadAuditButton({ result, backendRaw, thinkingSteps }: { result: AnalysisResult, backendRaw?: BackendResult | null, thinkingSteps?: {title: string, description: string}[] }) {
+  const handleDownload = () => {
+    const html = generateAuditHTML(result, backendRaw, thinkingSteps);
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const reqItem = (result.request_parsed.item || 'request').replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    const dateStr = new Date().toISOString().split('T')[0];
+    a.href = url;
+    a.download = `aria_audit_${reqItem}_${dateStr}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <div style={{ marginTop: 16, marginBottom: 8 }}>
+      <button
+        onClick={handleDownload}
+        style={{
+          width: '100%', padding: '12px 18px',
+          background: 'linear-gradient(135deg, #1E293B 0%, #0F172A 100%)',
+          border: 'none', borderRadius: 5, color: '#fff',
+          fontFamily: 'Inter, sans-serif', fontSize: 13, fontWeight: 600,
+          cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9,
+          transition: 'opacity 0.15s, transform 0.1s',
+          letterSpacing: '0.03em',
+        }}
+        onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.opacity = '0.88'; }}
+        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.opacity = '1'; }}
+      >
+        <span style={{ fontSize: 16 }}>⬇</span>
+        Download Full Audit Report
+      </button>
+      <div style={{ fontSize: 10, color: '#94A3B8', textAlign: 'center', marginTop: 5 }}>
+        Downloads as a printable HTML file · Open in browser and press <strong>Ctrl+P</strong> to save as PDF
+      </div>
+    </div>
+  );
+}
+
 // ”€”€ Main Output Panel ”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€”€
 interface OutputPanelProps {
   view: 'empty' | 'loading' | 'results';
@@ -892,13 +1348,14 @@ interface OutputPanelProps {
   backendRaw?: BackendResult | null;
   loadingStep: number;
   error: string | null;
+  thinkingSteps?: {title: string, description: string}[];
 }
 
-export default function OutputPanel({ view, result, backendRaw, loadingStep, error }: OutputPanelProps) {
+export default function OutputPanel({ view, result, backendRaw, loadingStep, error, thinkingSteps }: OutputPanelProps) {
   return (
     <div style={{ padding: '16px 18px', overflowY: 'auto', height: '100%' }}>
       {view === 'empty' && <EmptyState />}
-      {view === 'loading' && <LoadingView activeStep={loadingStep} />}
+      {view === 'loading' && <LoadingView activeStep={loadingStep} thinkingSteps={thinkingSteps} />}
       {view === 'results' && error && (
         <div style={{ background: 'rgba(220,38,38,0.04)', border: '1px solid rgba(220,38,38,0.25)', borderLeft: '3px solid #DC2626', borderRadius: 4, padding: 16 }}>
           <div style={{ fontWeight: 600, fontSize: 13, color: '#DC2626', marginBottom: 6 }}>Analysis Failed</div>
@@ -910,6 +1367,7 @@ export default function OutputPanel({ view, result, backendRaw, loadingStep, err
       )}
       {view === 'results' && result && !error && (
         <div>
+          {thinkingSteps && thinkingSteps.length > 0 && <AIThinkingSteps steps={thinkingSteps} expandedInitially={false} isComplete={true} />}
           <ParsedRequestCard data={result.request_parsed} compat={result.compatibility} />
           <PolicyCard rules={result.policy_evaluation} />
           <SupplierCard suppliers={result.suppliers} />
@@ -917,6 +1375,7 @@ export default function OutputPanel({ view, result, backendRaw, loadingStep, err
           <RecommendationCard rec={result.recommendation} />
           <AuditLogCard entries={result.audit_log} />
           {backendRaw && <BackendDetailsCard b={backendRaw} />}
+          <DownloadAuditButton result={result} backendRaw={backendRaw} thinkingSteps={thinkingSteps} />
         </div>
       )}
     </div>

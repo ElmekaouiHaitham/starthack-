@@ -49,5 +49,34 @@
       ]
     },
     "contradictions": []
+  },
+  "REQ-000001": {
+    "request_id": "REQ-000001",
+    "cache_hit": false,
+    "processing_notes": [
+      "JSON parse error: API returned invalid JSON: Expecting property name enclosed in double quotes: line 15 column 42 (char 455)\nRaw response:",
+      "JSON parse error: API returned invalid JSON: Expecting value: line 15 column 35 (char 448)\nRaw response:\n{\n  \"detected_language\": \"en\",\n  "
+    ],
+    "extraction": {
+      "detected_language": "en",
+      "english_translation": null,
+      "qty_primary": 400.0,
+      "qty_primary_unit": "consulting days",
+      "qty_total_rollout": null,
+      "qty_ambiguity_note": null,
+      "budget_extracted": 400000.0,
+      "budget_currency": "EUR",
+      "preferred_supplier_in_text": "Accenture Advisory Europe",
+      "policy_refusal": null,
+      "spec_mentioned": null,
+      "spec_implies_higher_cost": false,
+      "esg_signal_in_text": false,
+      "data_residency_signal_in_text": false,
+      "urgency_level": "standard",
+      "key_constraints": [
+        "Delivery required by 2026-05-17"
+      ]
+    },
+    "contradictions": []
   }
 }

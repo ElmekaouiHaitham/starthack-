@@ -4,10 +4,12 @@ import { useState, useEffect, useRef } from 'react';
 import Header from '@/components/Header';
 import InputPanel from '@/components/InputPanel';
 import OutputPanel from '@/components/OutputPanel';
-import { analyzeRequestFromBackend, analyzeFileFromBackend } from '@/lib/api';
+import { analyzeStreamRequestFromBackend, analyzeStreamFileFromBackend } from '@/lib/api';
 import { adaptBackendResult } from '@/lib/adapter';
 import { DEMO_RESULTS } from '@/lib/demo';
 import type { PurchaseRequest, AnalysisResult, BackendResult } from '@/lib/types';
+
+export type ThinkingStep = { title: string; description: string };
 
 export default function HomePage() {
   const [view, setView] = useState<'empty' | 'loading' | 'results'>('empty');
@@ -16,6 +18,7 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null);
   const [loadingStep, setLoadingStep] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [thinkingSteps, setThinkingSteps] = useState<ThinkingStep[]>([]);
   const stepInterval = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const startAnimation = () => {
@@ -59,9 +62,12 @@ export default function HomePage() {
 
     // Real backend call
     try {
-      let raw: BackendResult;
+      setThinkingSteps([]);
+      let res: Response;
+      let raw: BackendResult | undefined;
+      
       if (uploadedFile) {
-        raw = await analyzeFileFromBackend(uploadedFile) as BackendResult;
+        res = await analyzeStreamFileFromBackend(uploadedFile);
       } else {
         // Build a request dict matching the pipeline's expected shape
         const reqDict = {
@@ -82,7 +88,41 @@ export default function HomePage() {
           request_channel: req.request_channel,
           request_language: req.request_language,
         };
-        raw = await analyzeRequestFromBackend(reqDict) as BackendResult;
+        res = await analyzeStreamRequestFromBackend(reqDict);
+      }
+      
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder();
+      if (reader) {
+        let buffer = '';
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const parts = buffer.split('\n\n');
+          buffer = parts.pop() || '';
+          for (const part of parts) {
+            if (part.startsWith('data: ')) {
+               const dataStr = part.slice(6);
+               try {
+                 const ev = JSON.parse(dataStr);
+                 if (ev.type === 'step') {
+                   setThinkingSteps(prev => [...prev, { title: ev.title, description: ev.description }]);
+                 } else if (ev.type === 'result') {
+                   raw = ev.data;
+                 } else if (ev.type === 'error') {
+                   throw new Error(ev.detail);
+                 }
+               } catch (e) {
+                 console.error('Failed to parse SSE', dataStr);
+               }
+            }
+          }
+        }
+      }
+
+      if (!raw) {
+        throw new Error('Pipeline completed without returning a result.');
       }
       stopAnimation();
       await new Promise(r => setTimeout(r, 350));
@@ -102,7 +142,7 @@ export default function HomePage() {
       <Header />
       <main style={{ display: 'grid', gridTemplateColumns: '430px 1fr', flex: 1, overflow: 'hidden' }}>
         <InputPanel onAnalyze={handleAnalyze} loading={loading} />
-        <OutputPanel view={view} result={result} backendRaw={backendRaw} loadingStep={loadingStep} error={error} />
+        <OutputPanel view={view} result={result} backendRaw={backendRaw} loadingStep={loadingStep} error={error} thinkingSteps={thinkingSteps} />
       </main>
     </div>
   );

@@ -44,7 +44,7 @@ function mapPolicies(b: BackendResult): PolicyRule[] {
   rules.push({
     rule_id: 'POL-001',
     rule_name: 'Mandatory Information Check',
-    status: val?.completeness === 'pass' ? 'pass' : 'fail',
+    status: (val?.completeness === 'pass' || !(val?.missing_fields?.length)) ? 'pass' : 'fail',
     description: val?.missing_fields?.length
       ? `Missing fields: ${val.missing_fields.join(', ')}`
       : 'All mandatory fields present.',
