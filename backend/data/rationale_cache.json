@@ -8,5 +8,17 @@
     "excluded_summary": "No suppliers were excluded from the shortlist.",
     "recommendation_reason": "Recommendation is to proceed with an award to the rank 1 supplier, Azure Enterprise. This decision is conditional upon securing approval from the 'Head of Strategic Sourcing' for the contract value of EUR 1,320,000.00, as required by approval tier AT-004 and noted in escalation ER-003.",
     "preferred_supplier_rationale": null
+  },
+  "rationale_req_1773959589": {
+    "supplier_notes": {},
+    "excluded_summary": "No suppliers were excluded during sourcing.",
+    "recommendation_reason": "Sourcing cannot proceed. The request is blocked by escalations ER-001 (Missing required fields: category_l2) and ER-004 (No compliant supplier found for in EU). The requester must provide a complete category to identify and shortlist compliant suppliers.",
+    "preferred_supplier_rationale": null
+  },
+  "rationale_WEB-TEST": {
+    "supplier_notes": {},
+    "excluded_summary": "No suppliers were excluded during this sourcing event.",
+    "recommendation_reason": "This sourcing event cannot proceed due to the blocking escalation ER-004: No compliant supplier found for Laptops in EU. Manual intervention is required to identify a suitable supplier for this category and region.",
+    "preferred_supplier_rationale": null
   }
 }

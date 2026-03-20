@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import type { AnalysisResult, SupplierResult, PolicyRule, Escalation, AuditEntry, BackendResult } from '@/lib/types';
+import type { AnalysisResult, SupplierResult, PolicyRule, Escalation, AuditEntry, BackendResult, NegotiationLever, BundleOpportunity, AgenticInsight, EscalationCycleInsights } from '@/lib/types';
 import type { BatchEntry } from '@/app/page';
 
 // ”€”€ Utility ”€”€
@@ -327,6 +327,61 @@ function EscalationCard({ escalations }: { escalations: Escalation[] }) {
   );
 }
 
+function EscalationCycleInsightsCard({ cycle }: { cycle?: EscalationCycleInsights }) {
+  if (!cycle || !cycle.insights || cycle.insights.length === 0) return null;
+
+  const critical = cycle.insights.filter((i) => i.urgency === 'critical').length;
+  const tight = cycle.insights.filter((i) => i.urgency === 'tight').length;
+
+  return (
+    <StepCard
+      num="4+"
+      numColor={critical > 0 ? '#DC2626' : tight > 0 ? '#B45309' : '#0EA5E9'}
+      title="Escalation Cycle Insights"
+      sub="Historical approval-cycle feasibility vs required date"
+      badge={`${cycle.insights.length} CYCLE INSIGHT${cycle.insights.length > 1 ? 'S' : ''}`}
+      badgeType={critical > 0 ? 'err' : tight > 0 ? 'warn' : 'info'}
+    >
+      <div style={{ fontSize: 11.5, color: '#475569', marginBottom: 10, lineHeight: 1.5 }}>
+        {cycle.summary}
+      </div>
+
+      {cycle.insights.map((item, idx) => {
+        const isCritical = item.urgency === 'critical';
+        const isTight = item.urgency === 'tight';
+        const accent = isCritical ? '#DC2626' : isTight ? '#B45309' : '#0EA5E9';
+        const bg = isCritical ? 'rgba(220,38,38,0.04)' : isTight ? 'rgba(180,83,9,0.04)' : 'rgba(14,165,233,0.04)';
+        const border = isCritical ? 'rgba(220,38,38,0.2)' : isTight ? 'rgba(180,83,9,0.2)' : 'rgba(14,165,233,0.2)';
+
+        return (
+          <div
+            key={`${item.target}-${idx}`}
+            style={{
+              border: `1px solid ${border}`,
+              borderLeft: `3px solid ${accent}`,
+              background: bg,
+              borderRadius: 3,
+              padding: '10px 12px',
+              marginBottom: idx < cycle.insights.length - 1 ? 8 : 0,
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5, gap: 8, flexWrap: 'wrap' }}>
+              <span style={{ fontSize: 9.5, color: '#6B7280', letterSpacing: '0.06em', textTransform: 'uppercase', fontWeight: 700 }}>
+                {item.target} · {item.urgency.toUpperCase()}
+              </span>
+              <span style={{ fontSize: 10, color: '#334155' }}>
+                Avg {item.historical_mean_days.toFixed(1)}d · Median {item.historical_median_days.toFixed(1)}d · n={item.historical_sample_size}
+              </span>
+            </div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: '#0F172A', marginBottom: 5 }}>{item.insight}</div>
+            <div style={{ fontSize: 11.5, color: '#4B5563', lineHeight: 1.55 }}>{item.recommended_action}</div>
+          </div>
+        );
+      })}
+    </StepCard>
+  );
+}
+
 // ”€”€ Step 5: Recommendation ”€”€
 function RecommendationCard({ rec }: { rec: AnalysisResult['recommendation'] }) {
   const decisionMap = { auto_approve: 'AUTO-APPROVE', soft_escalate: 'SOFT ESCALATE', hard_escalate: 'HARD ESCALATE' };
@@ -398,6 +453,163 @@ function RecommendationCard({ rec }: { rec: AnalysisResult['recommendation'] }) 
   );
 }
 
+// ”€”€ Step 5b: Negotiation Advisor ”€”€
+function NegotiationCard({ levers }: { levers?: NegotiationLever[] }) {
+  if (!levers || levers.length === 0) return null;
+
+  return (
+    <StepCard num="+" numColor="#4F46E5" title="Negotiation Advisor"
+      sub="AI-detected levers to optimize contract value"
+      badge={`${levers.length} LEVER${levers.length !== 1 ? 'S' : ''} DETECTED`} badgeType="info">
+      
+      {levers.map((lever, idx) => (
+         <div key={idx} style={{
+            background: 'rgba(79,70,229,0.03)', border: '1px solid rgba(79,70,229,0.15)',
+            borderLeft: '3px solid #4F46E5', borderRadius: 4, padding: '12px 14px',
+            marginBottom: idx < levers.length - 1 ? 8 : 0
+         }}>
+           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 4 }}>
+             <div>
+               <div style={{ fontSize: 9.5, color: '#6B7280', letterSpacing: '0.06em', textTransform: 'uppercase', fontWeight: 600, marginBottom: 2 }}>
+                 {lever.type.replace(/_/g, ' ')} · {lever.confidence} CONFIDENCE
+               </div>
+               <div style={{ fontSize: 13, fontWeight: 700, color: '#1E293B', marginBottom: 6 }}>{lever.description}</div>
+             </div>
+             
+             {lever.saving_pct > 0 && (
+               <div style={{ textAlign: 'right', background: '#EEF2FF', padding: '4px 8px', borderRadius: 4, border: '1px solid #E0E7FF' }}>
+                 <div style={{ fontSize: 9.5, color: '#4F46E5', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Est. Savings</div>
+                 <div style={{ fontSize: 14, fontWeight: 800, color: '#4338CA' }}>~{lever.saving_pct.toFixed(1)}%</div>
+               </div>
+             )}
+           </div>
+           
+           <div style={{ fontSize: 11.5, color: '#475569', lineHeight: 1.5 }}>{lever.detail}</div>
+           
+           {/* Parameters altered */}
+           {lever.parameter_change && Object.keys(lever.parameter_change).length > 0 && (
+             <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+               {Object.entries(lever.parameter_change).map(([k, v]) => (
+                   <span key={k} style={{ fontSize: 10, background: '#fff', border: '1px solid #E2E8F0', padding: '2px 6px', borderRadius: 3, color: '#475569' }}>
+                     <strong style={{ color: '#1E293B' }}>{k}:</strong> {String(v)}
+                   </span>
+               ))}
+             </div>
+           )}
+           
+           {/* Supplier shift */}
+           {lever.new_supplier && lever.new_supplier !== lever.original_supplier && (
+             <div style={{ marginTop: 8, fontSize: 10.5, color: '#475569', background: '#F8FAFC', padding: '6px 8px', borderRadius: 3, border: '1px dotted #CBD5E1' }}>
+               <span style={{ fontWeight: 600 }}>Shift:</span> <span style={{ textDecoration: 'line-through', color: '#94A3B8' }}>{lever.original_supplier || 'Current'}</span> → <strong style={{ color: '#0F172A' }}>{lever.new_supplier}</strong>
+             </div>
+           )}
+         </div>
+      ))}
+    </StepCard>
+  );
+}
+
+// ── Step 5c: Agentic Insights ──
+function AgenticCard({ insights }: { insights?: AgenticInsight[] }) {
+  if (!insights || insights.length === 0) return null;
+  const highRiskCount = insights.filter((i) => i.relevance === 'high' || i.impact_score >= 8).length;
+  const topSignals = [...insights].sort((a, b) => b.impact_score - a.impact_score).slice(0, 2);
+
+  return (
+    <div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 12 }}>
+        {insights.map((insight, idx) => {
+          const icon = insight.type === 'news_risk' ? '📰' : insight.type === 'regional_constraint' ? '⚖️' : '🌐';
+          const relColor = insight.relevance === 'high' ? '#DC2626' : insight.relevance === 'medium' ? '#B45309' : '#374151';
+          
+          return (
+            <div key={idx} style={{
+              background: 'linear-gradient(135deg, #F5F3FF, #EDE9FE)', 
+              border: '1px solid rgba(124, 58, 237, 0.2)',
+              borderRadius: 8, padding: '14px',
+              position: 'relative', overflow: 'hidden'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                 <span style={{ fontSize: 18 }}>{icon}</span>
+                 <div>
+                   <div style={{ fontSize: 9, fontWeight: 700, color: '#7C3AED', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                     {insight.type.replace(/_/g, ' ')} · {insight.source}
+                   </div>
+                   <div style={{ fontSize: 13, fontWeight: 700, color: '#1E293B' }}>{insight.title}</div>
+                 </div>
+              </div>
+              
+              <p style={{ fontSize: 11.5, color: '#4B5563', lineHeight: 1.5, marginBottom: 12, margin: 0 }}>{insight.summary}</p>
+              
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, paddingTop: 8, borderTop: '1px solid rgba(124, 58, 237, 0.1)' }}>
+                 <div style={{ fontSize: 10, fontWeight: 700, color: relColor }}>
+                   RELEVANCE: {insight.relevance.toUpperCase()}
+                 </div>
+                 <div style={{ fontSize: 10, color: '#6D28D9', background: '#DDD6FE', padding: '2px 6px', borderRadius: 4, fontWeight: 600 }}>
+                   IMPACT: {insight.impact_score}/10
+                 </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div style={{
+        marginTop: 12,
+        border: '1px solid #DDD6FE',
+        background: '#FAF5FF',
+        borderRadius: 6,
+        padding: '10px 12px',
+      }}>
+        <div style={{ fontSize: 10, fontWeight: 700, color: '#6D28D9', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>
+          Transit & Regulation Snapshot
+        </div>
+        <div style={{ fontSize: 11, color: '#4B5563', lineHeight: 1.55 }}>
+          {highRiskCount > 0
+            ? `Detected ${highRiskCount} high-impact external signal${highRiskCount > 1 ? 's' : ''}.`
+            : 'No high-impact external signals; monitor medium volatility and lane conditions.'}
+        </div>
+        <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {topSignals.map((signal, idx) => (
+            <div key={idx} style={{ fontSize: 11, color: '#374151', background: '#fff', border: '1px solid #E9D5FF', borderRadius: 4, padding: '6px 8px' }}>
+              <strong style={{ color: '#5B21B6' }}>{signal.title}:</strong> {signal.summary}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ExternalDataSection({ insights }: { insights?: AgenticInsight[] }) {
+  if (!insights || insights.length === 0) return null;
+  return (
+    <div style={{
+      marginBottom: 14,
+      border: '1px solid #DDD6FE',
+      borderRadius: 8,
+      overflow: 'hidden',
+      background: '#FCFAFF',
+      boxShadow: '0 1px 2px rgba(17, 24, 39, 0.04)',
+    }}>
+      <div style={{
+        background: 'linear-gradient(135deg, #7C3AED, #4F46E5)',
+        color: '#fff',
+        padding: '10px 14px',
+        fontSize: 12,
+        fontWeight: 700,
+        letterSpacing: '0.04em',
+        textTransform: 'uppercase',
+      }}>
+        External Insights
+      </div>
+      <div style={{ padding: '12px' }}>
+        <AgenticCard insights={insights} />
+      </div>
+    </div>
+  );
+}
+
 // ”€”€ Step 6: Audit Log ”€”€
 function AuditLogCard({ entries }: { entries: AuditEntry[] }) {
   const resColor = (r: string) => r === 'pass' ? '#059669' : r === 'fail' ? '#DC2626' : r === 'warning' ? '#B45309' : '#1D4ED8';
@@ -440,6 +652,8 @@ function AuditLogCard({ entries }: { entries: AuditEntry[] }) {
 // ”€”€ Loading view ”€”€
 const STEPS = [
   'Parsing request text & extracting fields',
+  'Connecting to external regional data (Agentic)',
+  'Performing news-based risk assessment (Agentic)',
   'Validating completeness & consistency',
   'Evaluating policy rules & restrictions',
   'Scoring & ranking supplier options',
@@ -977,24 +1191,24 @@ function generateAuditHTML(result: AnalysisResult, backendRaw: BackendResult | n
   const suppliersRows = result.suppliers.map((s, i) => `
     <tr style="background:${i % 2 === 0 ? '#fff' : '#F8FAFC'}">
       <td style="padding:8px 10px;border-bottom:1px solid #E2E8F0;font-weight:700">${s.rank ?? i + 1}</td>
-      <td style="padding:8px 10px;border-bottom:1px solid #E2E8F0;font-weight:600">${h(s.supplier_name)}</td>
-      <td style="padding:8px 10px;border-bottom:1px solid #E2E8F0">${s.unit_price != null ? `${Number(s.unit_price).toLocaleString()} ${h(s.pricing_currency ?? '')}` : '—'}</td>
-      <td style="padding:8px 10px;border-bottom:1px solid #E2E8F0">${s.total_price != null ? `${Number(s.total_price).toLocaleString()} ${h(s.pricing_currency ?? '')}` : '—'}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #E2E8F0;font-weight:600">${h(s.name)}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #E2E8F0">${s.unit_price != null ? `${Number(s.unit_price).toLocaleString()} ${h(s.currency ?? '')}` : '—'}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #E2E8F0">${s.total_price != null ? `${Number(s.total_price).toLocaleString()} ${h(s.currency ?? '')}` : '—'}</td>
       <td style="padding:8px 10px;border-bottom:1px solid #E2E8F0">${s.lead_time_days != null ? `${s.lead_time_days} days` : '—'}</td>
       <td style="padding:8px 10px;border-bottom:1px solid #E2E8F0">${s.quality_score != null ? `${s.quality_score}/100` : '—'}</td>
       <td style="padding:8px 10px;border-bottom:1px solid #E2E8F0">${s.esg_score != null ? `${s.esg_score}/100` : '—'}</td>
       <td style="padding:8px 10px;border-bottom:1px solid #E2E8F0">${s.risk_score != null ? `${s.risk_score}/100` : '—'}</td>
-      <td style="padding:8px 10px;border-bottom:1px solid #E2E8F0"><span style="color:${statusColor(s.policy_compliant ? 'compliant' : 'non_compliant')};font-weight:700;text-transform:uppercase;font-size:11px">${s.policy_compliant ? 'COMPLIANT' : 'NON-COMPLIANT'}</span></td>
-      <td style="padding:8px 10px;border-bottom:1px solid #E2E8F0;font-size:11px;max-width:200px">${h(s.recommendation_note ?? '')}</td>
+      <td style="padding:8px 10px;border-bottom:1px solid #E2E8F0"><span style="color:${statusColor(s.status === 'compliant' ? 'compliant' : 'non_compliant')};font-weight:700;text-transform:uppercase;font-size:11px">${s.status === 'compliant' ? 'COMPLIANT' : 'NON-COMPLIANT'}</span></td>
+      <td style="padding:8px 10px;border-bottom:1px solid #E2E8F0;font-size:11px;max-width:200px">${h(s.rationale ?? '')}</td>
     </tr>`);
 
   const policyRows = result.policy_evaluation.map(r => `
     <tr>
       <td style="padding:10px 12px;border-bottom:1px solid #E2E8F0;font-family:monospace;font-size:11px;color:#6B7280">${h(r.rule_id)}</td>
-      <td style="padding:10px 12px;border-bottom:1px solid #E2E8F0;font-weight:600">${h(r.rule_type)}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #E2E8F0;font-weight:600">${h(r.rule_name)}</td>
       <td style="padding:10px 12px;border-bottom:1px solid #E2E8F0"><span style="color:${statusColor(r.status)};font-weight:700;text-transform:uppercase;font-size:11px">${r.status}</span></td>
-      <td style="padding:10px 12px;border-bottom:1px solid #E2E8F0">${h(r.rule_text)}</td>
-      <td style="padding:10px 12px;border-bottom:1px solid #E2E8F0;color:#DC2626;font-size:11px">${h(r.context ?? '—')}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #E2E8F0">${h(r.description)}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #E2E8F0;color:#DC2626;font-size:11px">${h(r.impact ?? '—')}</td>
     </tr>`);
 
   const escalationRows = result.escalations.length === 0
@@ -1099,7 +1313,7 @@ function generateAuditHTML(result: AnalysisResult, backendRaw: BackendResult | n
   <div class="decision-banner" style="background:${decisionColor}10;border:2px solid ${decisionColor}30">
     <div>
       <div class="decision-label" style="color:${decisionColor}">${decisionLabel}</div>
-      <div class="decision-meta" style="color:${decisionColor}">Recommended Supplier: <strong>${h(rec.top_supplier ?? '—')}</strong> · Confidence: ${h(rec.confidence?.toUpperCase() ?? '—')} · Quotes Required: ${rec.quotes_required ?? 1}</div>
+      <div class="decision-meta" style="color:${decisionColor}">Recommended Supplier: <strong>${h(rec.recommended_supplier_name ?? '—')}</strong> · Confidence: ${h(rec.confidence?.toUpperCase() ?? '—')} · Quotes Required: ${rec.quotes_required ?? 1}</div>
     </div>
     <div class="decision-confidence" style="color:${decisionColor}">${rec.confidence_score ?? '—'}%</div>
   </div>
@@ -1160,14 +1374,14 @@ function generateAuditHTML(result: AnalysisResult, backendRaw: BackendResult | n
     <div class="section-title">5. Final Recommendation</div>
     <div class="kv-grid">
       <div class="kv-row"><div class="kv-label">Decision</div><div class="kv-value" style="color:${decisionColor};font-weight:700">${decisionLabel}</div></div>
-      <div class="kv-row"><div class="kv-label">Recommended Supplier</div><div class="kv-value">${h(rec.top_supplier ?? '—')}</div></div>
+      <div class="kv-row"><div class="kv-label">Recommended Supplier</div><div class="kv-value">${h(rec.recommended_supplier_name ?? '—')}</div></div>
       <div class="kv-row"><div class="kv-label">Confidence Level</div><div class="kv-value">${h(rec.confidence?.toUpperCase() ?? '—')} (${rec.confidence_score ?? '—'}%)</div></div>
       <div class="kv-row"><div class="kv-label">Required Approver</div><div class="kv-value">${h(rec.required_approver ?? '—')}</div></div>
       <div class="kv-row"><div class="kv-label">Quotes Required</div><div class="kv-value">${rec.quotes_required ?? 1}</div></div>
-      <div class="kv-row"><div class="kv-label">Estimated Total Value</div><div class="kv-value">${rec.top_supplier_total != null ? `${Number(rec.top_supplier_total).toLocaleString()} ${h(rec.minimum_budget_currency ?? '')}` : '—'}</div></div>
+      <div class="kv-row"><div class="kv-label">Estimated Total Value</div><div class="kv-value">${rec.total_estimated_value != null ? `${Number(rec.total_estimated_value).toLocaleString()} ${h(rec.currency ?? '')}` : '—'}</div></div>
     </div>
     <div style="font-size:11px;font-weight:600;color:#374151;margin-bottom:6px">Reasoning</div>
-    <div class="reasoning-box">${h(rec.reason)}</div>
+    <div class="reasoning-box">${h(rec.reasoning)}</div>
     <div style="font-size:11px;font-weight:600;color:#374151;margin-bottom:8px">Next Steps</div>
     <ol class="next-steps" style="padding-left:20px">
       ${(rec.next_steps ?? []).map(s => `<li>${h(s)}</li>`).join('')}
@@ -1225,7 +1439,7 @@ function generateAuditHTML(result: AnalysisResult, backendRaw: BackendResult | n
 
     <!-- Supplier Shortlist (full detail) -->
     <div style="font-size:12px;font-weight:700;color:#374151;margin:12px 0 8px;padding-left:4px;border-left:3px solid #059669">Supplier Shortlist — Full Detail</div>
-    ${(backendRaw.supplier_shortlist ?? []).map((s: Record<string, unknown>, i: number) => `
+    ${(backendRaw.supplier_shortlist ?? []).map((s: BackendSupplier, i: number) => `
       <div style="margin-bottom:12px;border:1px solid #E2E8F0;border-radius:4px;overflow:hidden">
         <div style="background:#F8FAFC;padding:7px 12px;font-size:11px;font-weight:700;color:#374151;border-bottom:1px solid #E2E8F0">
           #${i+1} — ${h(s.supplier_name ?? s.supplier_id ?? `Supplier ${i+1}`)}
@@ -1238,9 +1452,9 @@ function generateAuditHTML(result: AnalysisResult, backendRaw: BackendResult | n
       </div>`).join('')}
 
     <!-- Excluded Suppliers -->
-    ${(backendRaw.excluded_suppliers ?? []).length > 0 ? `
+    ${(backendRaw.suppliers_excluded ?? []).length > 0 ? `
     <div style="font-size:12px;font-weight:700;color:#DC2626;margin:12px 0 8px;padding-left:4px;border-left:3px solid #DC2626">Excluded Suppliers</div>
-    ${(backendRaw.excluded_suppliers ?? []).map((s: Record<string, unknown>, i: number) => `
+    ${(backendRaw.suppliers_excluded ?? []).map((s: Record<string, unknown>, i: number) => `
       <div style="margin-bottom:10px;border:1px solid #FEE2E2;border-radius:4px;overflow:hidden">
         <div style="background:#FEF2F2;padding:7px 12px;font-size:11px;font-weight:700;color:#DC2626;border-bottom:1px solid #FEE2E2">
           ${h(s.supplier_name ?? s.supplier_id ?? `Excluded ${i+1}`)}
@@ -1430,6 +1644,7 @@ function BatchEntryPanel({ entry }: { entry: BatchEntry }) {
 
   return (
     <div style={{ padding: '16px 18px', overflowY: 'auto', height: '100%' }}>
+      <ExternalDataSection insights={entry.result?.agentic_insights} />
 
       {/* Live reasoning (shown while processing and after done) */}
       {hasSteps && (
@@ -1490,7 +1705,9 @@ function BatchEntryPanel({ entry }: { entry: BatchEntry }) {
           <PolicyCard rules={entry.result.policy_evaluation} />
           <SupplierCard suppliers={entry.result.suppliers} />
           <EscalationCard escalations={entry.result.escalations} />
+          <EscalationCycleInsightsCard cycle={entry.result.escalation_cycle_insights} />
           <RecommendationCard rec={entry.result.recommendation} />
+          <NegotiationCard levers={entry.result.negotiation_levers} />
           <AuditLogCard entries={entry.result.audit_log} />
           {entry.backendRaw && <BackendDetailsCard b={entry.backendRaw} />}
           <DownloadAuditButton result={entry.result} backendRaw={entry.backendRaw} thinkingSteps={entry.thinkingSteps} />
@@ -1573,8 +1790,30 @@ function BatchView({
       <BatchTabBar entries={entries} selected={clampedIdx} onSelect={(i) => setManualTab(i)} />
 
       {/* Tab content — fills remaining height */}
-      <div style={{ flex: 1, overflow: 'hidden' }}>
-        <BatchEntryPanel key={clampedIdx} entry={selectedEntry} />
+      <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        
+        {/* Global Batch Notice (Bundling Opportunities) */}
+        {allDone && selectedEntry?.result?.bundle_opportunities && selectedEntry.result.bundle_opportunities.length > 0 && (
+          <div style={{ background: '#FFFBEB', borderBottom: '1px solid #FEF3C7', padding: '10px 16px', display: 'flex', gap: 12, alignItems: 'flex-start', flexShrink: 0 }}>
+             <div style={{ fontSize: 18, alignSelf: 'center' }}>📦</div>
+             <div>
+               <div style={{ fontWeight: 700, fontSize: 12, color: '#92400E', marginBottom: 2 }}>{selectedEntry.result.bundle_opportunities.length} Bundle Opportunit{selectedEntry.result.bundle_opportunities.length > 1 ? 'ies' : 'y'} Detected Across Batch</div>
+               <div style={{ fontSize: 11, color: '#B45309', marginBottom: 6 }}>The Demand Aggregator found overlaps in the requested items that qualify for volume discounts.</div>
+               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                 {selectedEntry.result.bundle_opportunities.map(opp => (
+                    <div key={opp.opportunity_id} style={{ background: '#FEF3C7', border: '1px solid #FDE68A', padding: '6px 10px', borderRadius: 4, fontSize: 10, color: '#92400E' }}>
+                      <strong style={{ color: '#78350F' }}>{opp.category_l2} ({opp.region}):</strong> Combine {opp.request_count} requests for {opp.combined_quantity} total. 
+                      Est. saving: <strong>{opp.saving_eur?.toLocaleString()} EUR (~{opp.saving_pct?.toFixed(1)}%)</strong> with {opp.recommended_supplier_name}.
+                    </div>
+                 ))}
+               </div>
+             </div>
+          </div>
+        )}
+
+        <div style={{ flex: 1, overflow: 'hidden' }}>
+          <BatchEntryPanel key={clampedIdx} entry={selectedEntry} />
+        </div>
       </div>
     </div>
   );
@@ -1617,12 +1856,15 @@ export default function OutputPanel({ view, result, backendRaw, loadingStep, err
       )}
       {view === 'results' && result && !error && (
         <div>
+          <ExternalDataSection insights={result.agentic_insights} />
           {thinkingSteps && thinkingSteps.length > 0 && <AIThinkingSteps steps={thinkingSteps} expandedInitially={false} isComplete={true} />}
           <ParsedRequestCard data={result.request_parsed} compat={result.compatibility} />
           <PolicyCard rules={result.policy_evaluation} />
           <SupplierCard suppliers={result.suppliers} />
           <EscalationCard escalations={result.escalations} />
+          <EscalationCycleInsightsCard cycle={result.escalation_cycle_insights} />
           <RecommendationCard rec={result.recommendation} />
+          <NegotiationCard levers={result.negotiation_levers} />
           <AuditLogCard entries={result.audit_log} />
           {backendRaw && <BackendDetailsCard b={backendRaw} />}
           <DownloadAuditButton result={result} backendRaw={backendRaw} thinkingSteps={thinkingSteps} />

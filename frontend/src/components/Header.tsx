@@ -71,6 +71,41 @@ export default function Header() {
           ONLINE
         </div>
 
+        <nav style={{ display: 'flex', gap: 16, marginLeft: 20 }}>
+          <a 
+            href="/" 
+            style={{ 
+              fontSize: 13, 
+              fontWeight: 600, 
+              color: '#475569', 
+              textDecoration: 'none',
+              padding: '6px 12px',
+              borderRadius: 6,
+              transition: 'all 0.2s'
+            }}
+            onMouseOver={(e) => { e.currentTarget.style.background = '#F1F5F9'; e.currentTarget.style.color = '#0F172A'; }}
+            onMouseOut={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#475569'; }}
+          >
+            Dashboard
+          </a>
+          <a 
+            href="/analytics" 
+            style={{ 
+              fontSize: 13, 
+              fontWeight: 600, 
+              color: '#475569', 
+              textDecoration: 'none',
+              padding: '6px 12px',
+              borderRadius: 6,
+              transition: 'all 0.2s'
+            }}
+            onMouseOver={(e) => { e.currentTarget.style.background = '#F1F5F9'; e.currentTarget.style.color = '#0F172A'; }}
+            onMouseOut={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#475569'; }}
+          >
+            Analytics
+          </a>
+        </nav>
+
 
       </div>
 

@@ -132,5 +132,119 @@
         "recommended_action": "Use detected language for NLP processing. The translated text is authoritative."
       }
     ]
+  },
+  "unknown": {
+    "request_id": "unknown",
+    "cache_hit": false,
+    "processing_notes": [],
+    "extraction": {
+      "detected_language": "en",
+      "english_translation": null,
+      "qty_primary": 10.0,
+      "qty_primary_unit": null,
+      "qty_total_rollout": null,
+      "qty_ambiguity_note": null,
+      "budget_extracted": 15000.0,
+      "budget_currency": "EUR",
+      "preferred_supplier_in_text": null,
+      "policy_refusal": null,
+      "spec_mentioned": null,
+      "spec_implies_higher_cost": false,
+      "esg_signal_in_text": false,
+      "data_residency_signal_in_text": false,
+      "urgency_level": "standard",
+      "key_constraints": []
+    },
+    "contradictions": []
+  },
+  "REQ-000005": {
+    "request_id": "REQ-000005",
+    "cache_hit": false,
+    "processing_notes": [],
+    "extraction": {
+      "detected_language": "en",
+      "english_translation": null,
+      "qty_primary": 50.0,
+      "qty_primary_unit": "desktop workstations",
+      "qty_total_rollout": null,
+      "qty_ambiguity_note": null,
+      "budget_extracted": 120000.0,
+      "budget_currency": "EUR",
+      "preferred_supplier_in_text": null,
+      "policy_refusal": null,
+      "spec_mentioned": null,
+      "spec_implies_higher_cost": false,
+      "esg_signal_in_text": false,
+      "data_residency_signal_in_text": false,
+      "urgency_level": "standard",
+      "key_constraints": [
+        "Delivery required by 2026-06-03"
+      ]
+    },
+    "contradictions": [
+      {
+        "contradiction_id": "C-001",
+        "contradiction_type": "LANGUAGE_MISMATCH",
+        "severity": "warning",
+        "field_value": "de",
+        "text_value": "en",
+        "description": "request_language field='de' but text is actually in 'en'. ",
+        "recommended_action": "Use detected language for NLP processing. The translated text is authoritative."
+      }
+    ]
+  },
+  "REQ-000007": {
+    "request_id": "REQ-000007",
+    "cache_hit": false,
+    "processing_notes": [],
+    "extraction": {
+      "detected_language": "en",
+      "english_translation": null,
+      "qty_primary": 400000.0,
+      "qty_primary_unit": "GB",
+      "qty_total_rollout": null,
+      "qty_ambiguity_note": null,
+      "budget_extracted": 11200.0,
+      "budget_currency": "EUR",
+      "preferred_supplier_in_text": null,
+      "policy_refusal": null,
+      "spec_mentioned": null,
+      "spec_implies_higher_cost": false,
+      "esg_signal_in_text": false,
+      "data_residency_signal_in_text": true,
+      "urgency_level": "urgent",
+      "key_constraints": [
+        "Must be delivered by 2026-04-28",
+        "For EU workloads"
+      ]
+    },
+    "contradictions": []
+  },
+  "WEB-TEST": {
+    "request_id": "WEB-TEST",
+    "cache_hit": false,
+    "processing_notes": [],
+    "extraction": {
+      "detected_language": "en",
+      "english_translation": null,
+      "qty_primary": 100.0,
+      "qty_primary_unit": "laptops",
+      "qty_total_rollout": null,
+      "qty_ambiguity_note": null,
+      "budget_extracted": 100000.0,
+      "budget_currency": "EUR",
+      "preferred_supplier_in_text": null,
+      "policy_refusal": null,
+      "spec_mentioned": null,
+      "spec_implies_higher_cost": false,
+      "esg_signal_in_text": false,
+      "data_residency_signal_in_text": false,
+      "urgency_level": "standard",
+      "key_constraints": [
+        "delivery to Germany",
+        "delivery within 30 days"
+      ]
+    },
+    "contradictions": []
   }
 }

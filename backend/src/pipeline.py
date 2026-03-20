@@ -87,6 +87,9 @@ from rule_engine_v3 import ProcurementRuleEngine
 from scoring_calibrator import ScoringCalibrator
 from nlp_extractor import NLPExtractor, apply_nlp_to_rule_engine_input
 from rationale_generator import RationaleGenerator, _template_fallback, _merge_rationale
+from optimization_engine import NegotiationAdvisor, DemandAggregator
+from historical_analytics import HistoricalAnalytics
+from dataclasses import asdict
 
 DATA_DIR = Path(__file__).parent
 
@@ -112,11 +115,15 @@ class Pipeline:
         data_dir: Path = DATA_DIR,
         enable_nlp: bool = True,
         enable_rationale: bool = True,
+        enable_optimization: bool = True,
+        enable_bundling: bool = True,
         force_refresh: bool = False,
     ):
         self.data_dir         = data_dir
         self.enable_nlp       = enable_nlp
         self.enable_rationale = enable_rationale
+        self.enable_optimization = enable_optimization
+        self.enable_bundling  = enable_bundling
         self.force_refresh    = force_refresh
 
         # Always-on: rule engine + calibrator
@@ -155,6 +162,19 @@ class Pipeline:
                 print(f"  WARNING: Rationale layer disabled — {e}")
                 self.enable_rationale = False
 
+        self.advisor: NegotiationAdvisor | None = None
+        if self.enable_optimization:
+            print("Initialising Negotiation Advisor…")
+            self.advisor = NegotiationAdvisor(data_dir=data_dir)
+
+        self.aggregator: DemandAggregator | None = None
+        if self.enable_bundling:
+            print("Initialising Demand Aggregator…")
+            self.aggregator = DemandAggregator(data_dir=data_dir)
+
+        print("Initialising Historical Analytics…")
+        self.analytics = HistoricalAnalytics(data_dir=data_dir / "../data")
+
         print("Pipeline ready.\n")
 
     # ─────────────────────────────────────────────────────────────────────────
@@ -187,6 +207,9 @@ class Pipeline:
         # ── Layer 3: Re-score with calibrated weights ────────────────────────
         engine_output = self._apply_calibrated_scores(engine_output, working_request)
 
+        # ── Layer 3b: Historical analytics insights ──────────────────────────
+        engine_output = self.analytics.attach(engine_output, working_request)
+
         # ── Layer 4: Rationale generation ────────────────────────────────────
         if self.enable_rationale and self.rationale_gen:
             try:
@@ -205,9 +228,19 @@ class Pipeline:
         final_output["_pipeline"] = {
             "nlp_enabled":       self.enable_nlp,
             "rationale_enabled": self.enable_rationale,
+            "optimization_enabled": self.enable_optimization,
+            "bundling_enabled":  self.enable_bundling,
             "calibration_auc":   round(self.calibrator._report.cv_auc_mean, 3),
             "pipeline_version":  "v1.0",
         }
+
+        # ── Layer 5: Negotiation Advisor ──────────────────────────────────────
+        run_opt = request.get("_enable_optimization", self.enable_optimization)
+        print(f"DEBUG: run_opt={run_opt}, advisor={self.advisor is not None}")
+        if run_opt and self.advisor:
+            levers = self.advisor.advise(final_output, request)
+            print(f"DEBUG: Found {len(levers)} levers for {req_id}")
+            final_output["negotiation_levers"] = [asdict(l) for l in levers]
 
         return final_output
 
@@ -254,6 +287,10 @@ class Pipeline:
         yield {"type": "step", "title": "Ranking Complete", "description": "I've ranked the best suppliers for you"}
         time.sleep(0.5)
 
+        # ── Layer 3b: Historical analytics insights ──────────────────────────
+        yield {"type": "step", "title": "Checking Escalation Feasibility", "description": "Comparing escalation cycle history with your required delivery date to see if the normal process is fast enough"}
+        engine_output = self.analytics.attach(engine_output, working_request)
+
         # ── Layer 4: Rationale generation ────────────────────────────────────
         yield {"type": "step", "title": "Writing Recommendation", "description": "Putting together a clear explanation of my final decision for your review"}
         if self.enable_rationale and self.rationale_gen:
@@ -276,9 +313,24 @@ class Pipeline:
         final_output["_pipeline"] = {
             "nlp_enabled":       self.enable_nlp,
             "rationale_enabled": self.enable_rationale,
+            "optimization_enabled": self.enable_optimization,
+            "bundling_enabled":  self.enable_bundling,
             "calibration_auc":   round(self.calibrator._report.cv_auc_mean, 3),
             "pipeline_version":  "v1.0",
         }
+
+        run_opt = request.get("_enable_optimization", self.enable_optimization)
+        if run_opt and self.advisor:
+            yield {"type": "step", "title": "Optimizing Strategy", "description": "Looking for negotiation levers to improve the contract value"}
+            levers = self.advisor.advise(final_output, request)
+            final_output["negotiation_levers"] = [asdict(l) for l in levers]
+            if levers:
+                yield {"type": "step", "title": "Optimization Complete", "description": f"Found {len(levers)} potential negotiation levers"}
+
+        # Store input for batch-level bundling if enabled
+        run_bundle = request.get("_enable_bundling", self.enable_bundling)
+        if run_bundle:
+            self._last_request_for_bundling = request
 
         yield {"type": "result", "data": final_output}
 
@@ -364,6 +416,7 @@ class Pipeline:
         results = []
         errors  = []
         t0 = time.time()
+        bundle_opps = []
 
         for i, req in enumerate(requests):
             req_id = req.get("request_id", f"idx_{i}")
@@ -393,6 +446,24 @@ class Pipeline:
             )
             if verbose:
                 print(f"Saved → {output_path}")
+
+        # ── Cross-Batch Demand Aggregation ──────────────────────────────────
+        # Check if any request requested bundling OR if pipeline default is true
+        any_bundling_requested = any(r.get("_enable_bundling", self.enable_bundling) for r in requests)
+        
+        if any_bundling_requested and self.aggregator:
+            if verbose:
+                print("\nRunning Demand Aggregation across batch…")
+            opps = self.aggregator.find_opportunities(requests)
+            bundle_opps = [asdict(o) for o in opps]
+            if verbose:
+                print(self.aggregator.summary_report(opps))
+
+            # Since the API primarily returns per-request outputs, and bundle_opps is a cross-request aggregate,
+            # we attach the bundle_opps to all request outputs in the batch so the frontend receives them.
+            if bundle_opps:
+                for r in results:
+                    r["bundle_opportunities"] = bundle_opps
 
         if verbose:
             self._print_summary(results)

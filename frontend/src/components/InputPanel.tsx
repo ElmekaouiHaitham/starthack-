@@ -14,9 +14,10 @@ const DEFAULT_FORM = {
   text: '', cat1: '', cat2: '', qty: '', unit: 'units', date: '',
   budget: '', currency: 'EUR', country: '', supplier: '', bu: '',
   delivery: '', esg: false, drc: false, channel: 'portal', lang: 'en',
+  optNeg: true, optBun: true, agenticMode: false,
 };
 
-type FormState = typeof DEFAULT_FORM & { esg: boolean; drc: boolean };
+type FormState = typeof DEFAULT_FORM & { esg: boolean; drc: boolean; optNeg: boolean; optBun: boolean; agenticMode: boolean };
 
 export default function InputPanel({ onAnalyze, loading }: InputPanelProps) {
   const [activeTab, setActiveTab] = useState<'manual' | 'json'>('manual');
@@ -46,6 +47,7 @@ export default function InputPanel({ onAnalyze, loading }: InputPanelProps) {
       unit: ex.unit, date: ex.date, budget: ex.budget, currency: ex.currency,
       country: ex.country, supplier: ex.supplier, bu: ex.bu, delivery: ex.delivery,
       esg: ex.esg, drc: ex.drc, channel: ex.channel, lang: ex.lang,
+      optNeg: true, optBun: true, agenticMode: form.agenticMode || false,
     });
     setActiveTab('manual');
   };
@@ -72,6 +74,9 @@ export default function InputPanel({ onAnalyze, loading }: InputPanelProps) {
       data_residency_constraint: form.drc,
       request_channel: form.channel,
       request_language: form.lang,
+      _enable_optimization: form.optNeg,
+      _enable_bundling: form.optBun,
+      agentic_mode: form.agenticMode,
     };
     onAnalyze(req, demoKey);
   };
@@ -80,18 +85,35 @@ export default function InputPanel({ onAnalyze, loading }: InputPanelProps) {
     if (!uploadedFile && !jsonText.trim()) { alert('Please paste or upload a JSON request.'); return; }
     // Batch mode: file with multiple requests
     if (parsedRequests && parsedRequests.length > 1) {
-      const empty = {} as PurchaseRequest;
-      onAnalyze(empty, undefined, undefined, parsedRequests);
+      const empty: PurchaseRequest = {
+         request_text: '', category_l1: '', category_l2: '', quantity: null, unit_of_measure: '', required_by_date: null, budget_amount: null, currency: 'EUR', country: '', preferred_supplier_mentioned: null, business_unit: null, delivery_countries: [], esg_requirement: false, data_residency_constraint: false, request_channel: '', request_language: '',
+         _enable_bundling: form.optBun 
+      };
+      
+      const requestsWithFlags = parsedRequests.map((r) => ({
+        ...r, _enable_bundling: form.optBun, _enable_optimization: form.optNeg, agentic_mode: form.agenticMode
+      }));
+
+      onAnalyze(empty, undefined, undefined, requestsWithFlags);
       return;
     }
-    // Single file upload
-    if (uploadedFile && (!parsedRequests || parsedRequests.length <= 1)) {
-      const empty = {} as PurchaseRequest;
-      onAnalyze(empty, undefined, uploadedFile);
+    // Single file upload: apply UI flags directly to the parsed JSON request
+    if (uploadedFile && parsedRequests && parsedRequests.length === 1) {
+      const parsed = parsedRequests[0] as PurchaseRequest;
+      parsed._enable_optimization = form.optNeg;
+      parsed._enable_bundling = form.optBun;
+      parsed.agentic_mode = form.agenticMode;
+      onAnalyze(parsed);
       return;
     }
     let parsed: PurchaseRequest;
-    try { const raw = JSON.parse(jsonText); parsed = Array.isArray(raw) ? raw[0] : raw; }
+    try { 
+      const raw = JSON.parse(jsonText); 
+      parsed = Array.isArray(raw) ? raw[0] : raw; 
+      parsed._enable_optimization = form.optNeg;
+      parsed._enable_bundling = form.optBun;
+      parsed.agentic_mode = form.agenticMode;
+    }
     catch { alert('Invalid JSON.'); return; }
     onAnalyze(parsed);
   };
@@ -273,6 +295,33 @@ export default function InputPanel({ onAnalyze, loading }: InputPanelProps) {
             </div>
           </FG>
 
+          {/* AI Optimizer Add-ons */}
+          <FG>
+            <label style={labelStyle}>AI Optimizer Extra Modules</label>
+            <div style={{ display: 'flex', gap: 15, marginTop: 4, flexWrap: 'wrap' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: 11, color: '#334155', background: '#F1F5F9', padding: '4px 8px', borderRadius: 4, border: '1px solid #E2E8F0' }}>
+                <input type="checkbox" checked={!!form.optNeg} onChange={e => setField('optNeg', e.target.checked)}
+                  style={{ width: 13, height: 13, accentColor: '#4F46E5', cursor: 'pointer' }} />
+                Negotiation Advisor (Single)
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: 11, color: '#334155', background: '#F1F5F9', padding: '4px 8px', borderRadius: 4, border: '1px solid #E2E8F0' }}>
+                <input type="checkbox" checked={!!form.optBun} onChange={e => setField('optBun', e.target.checked)}
+                  style={{ width: 13, height: 13, accentColor: '#4F46E5', cursor: 'pointer' }} />
+                Demand Aggregator (Batch)
+              </label>
+              <label style={{ 
+                display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: 11, 
+                color: '#fff', background: 'linear-gradient(135deg, #4F46E5, #7C3AED)', 
+                padding: '4px 10px', borderRadius: 4, border: '1px solid #4338CA',
+                boxShadow: '0 2px 4px rgba(79, 70, 229, 0.2)'
+              }}>
+                <input type="checkbox" checked={!!form.agenticMode} onChange={e => setField('agenticMode', e.target.checked)}
+                  style={{ width: 13, height: 13, accentColor: '#fff', cursor: 'pointer' }} />
+                ✨ Agentic Mode (External Data)
+              </label>
+            </div>
+          </FG>
+
           {/* Channel & Language */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
             <FG>
@@ -363,6 +412,33 @@ export default function InputPanel({ onAnalyze, loading }: InputPanelProps) {
               onChange={e => setJsonText(e.target.value)}
             />
           </div>
+
+          <FG>
+            <label style={labelStyle}>AI Optimizer (Batch Options)</label>
+             <div style={{ display: 'flex', gap: 15, marginTop: 4, flexWrap: 'wrap' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: 11, color: '#334155', background: '#F1F5F9', padding: '4px 8px', borderRadius: 4, border: '1px solid #E2E8F0' }}>
+                <input type="checkbox" checked={!!form.optBun} onChange={e => setField('optBun', e.target.checked)}
+                  style={{ width: 13, height: 13, accentColor: '#4F46E5', cursor: 'pointer' }} />
+                Run Demand Aggregator (Bundling)
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: 11, color: '#334155', background: '#F1F5F9', padding: '4px 8px', borderRadius: 4, border: '1px solid #E2E8F0' }}>
+                <input type="checkbox" checked={!!form.optNeg} onChange={e => setField('optNeg', e.target.checked)}
+                  style={{ width: 13, height: 13, accentColor: '#4F46E5', cursor: 'pointer' }} />
+                Run Negotiation Advisor
+              </label>
+              <label style={{ 
+                display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: 11, 
+                color: '#fff', background: 'linear-gradient(135deg, #4F46E5, #7C3AED)', 
+                padding: '4px 10px', borderRadius: 4, border: '1px solid #4338CA',
+                boxShadow: '0 2px 4px rgba(79, 70, 229, 0.2)'
+              }}>
+                <input type="checkbox" checked={!!form.agenticMode} onChange={e => setField('agenticMode', e.target.checked)}
+                  style={{ width: 13, height: 13, accentColor: '#fff', cursor: 'pointer' }} />
+                ✨ Agentic Mode (External Data)
+              </label>
+            </div>
+          </FG>
+
           <button className="btn-primary" onClick={handleJsonSubmit} disabled={loading}>
             {loading ? 'Analysing…' : '▶  Analyse JSON'}
           </button>

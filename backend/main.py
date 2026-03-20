@@ -31,6 +31,7 @@ SRC_DIR = Path(__file__).parent / "src"
 sys.path.insert(0, str(SRC_DIR))
 
 from pipeline import Pipeline  # noqa: E402  (after sys.path insert)
+from historical_analytics import EscalationCycleAnalyzer, ConcentrationRiskMonitor
 
 DATA_DIR = Path(__file__).parent / "data"
 
@@ -43,6 +44,9 @@ DATA_DIR = Path(__file__).parent / "data"
 async def lifespan(app: FastAPI):
     print("Initialising ChainIQ pipeline…")
     app.state.pipeline = Pipeline(data_dir=SRC_DIR, enable_nlp=True, enable_rationale=True)
+    print("Initialising Historical Analytics…")
+    app.state.cycle_analyzer = EscalationCycleAnalyzer(data_dir=DATA_DIR)
+    app.state.concentration_monitor = ConcentrationRiskMonitor(data_dir=DATA_DIR)
     print("Pipeline ready — server accepting requests.")
     yield
     print("Shutting down.")
@@ -115,6 +119,25 @@ async def health_check():
     return {"status": "ok"}
 
 
+@app.get("/analytics", tags=["analytics"])
+async def get_analytics(request: Request):
+    """
+    Returns historical analytics: cycle time profiles and portfolio concentration.
+    """
+    from dataclasses import asdict
+    
+    cycle_analyzer: EscalationCycleAnalyzer = request.app.state.cycle_analyzer
+    concentration: ConcentrationRiskMonitor = request.app.state.concentration_monitor
+    
+    profiles = {k: asdict(v) for k, v in cycle_analyzer.profiles().items()}
+    segments = [asdict(s) for s in concentration.segments()]
+    
+    return {
+        "cycle_profiles": profiles,
+        "concentration_segments": segments
+    }
+
+
 @app.post("/analyze", tags=["pipeline"])
 async def analyze(request: Request, file: UploadFile | None = File(default=None)):
     """
@@ -172,10 +195,29 @@ async def analyze_stream(request: Request, file: UploadFile | None = File(defaul
 
     return StreamingResponse(event_generator(), media_type="text/event-stream")
 
+@app.post("/bundle", tags=["pipeline"])
+async def bundle_requests(request: Request):
+    """
+    Accepts a list of JSON requests and returns bundle opportunities.
+    """
+    raw = await request.body()
+    try:
+        text = raw.decode("utf-8")
+        data = json.loads(text)
+        if not isinstance(data, list):
+            raise HTTPException(status_code=422, detail="Expected JSON array")
+        from dataclasses import asdict
+        opps = request.app.state.pipeline.aggregator.find_opportunities(data)
+        return [asdict(o) for o in opps]
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 # CLI ENTRY POINT
 # ══════════════════════════════════════════════════════════════════════════════
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    # Keep single-process startup by default on Windows to avoid stale reloader
+    # workers accumulating and intermittently hanging requests on port 8000.
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=False)

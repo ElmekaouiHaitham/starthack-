@@ -133,6 +133,42 @@ export interface Recommendation {
   next_steps: string[];
 }
 
+export interface NegotiationLever {
+  type: string;
+  description: string;
+  parameter_change: Record<string, any>;
+  saving_amount: number;
+  saving_pct: number;
+  new_supplier: string | null;
+  original_supplier: string | null;
+  confidence: 'HIGH' | 'MEDIUM' | 'LOW';
+  detail: string;
+}
+
+export interface BundleOpportunity {
+  opportunity_id: string;
+  category_l1: string;
+  category_l2: string;
+  region: string;
+  request_ids: string[];
+  request_count: number;
+  individual_quantities: number[];
+  combined_quantity: number;
+  individual_total_cost_eur: number;
+  bundled_unit_price_eur: number;
+  bundled_total_cost_eur: number;
+  saving_eur: number;
+  saving_pct: number;
+  individual_tier_label: string;
+  bundled_tier_label: string;
+  tier_boundary_crossed: number;
+  recommended_supplier_id: string;
+  recommended_supplier_name: string;
+  split_detection_flag: boolean;
+  split_detail: string;
+  summary: string;
+}
+
 export interface AuditEntry {
   timestamp: string;
   layer: string;
@@ -149,6 +185,10 @@ export interface AnalysisResult {
   escalations: Escalation[];
   recommendation: Recommendation;
   audit_log: AuditEntry[];
+  negotiation_levers?: NegotiationLever[];
+  bundle_opportunities?: BundleOpportunity[];
+  agentic_insights?: AgenticInsight[];
+  escalation_cycle_insights?: EscalationCycleInsights;
 }
 
 // ── Request input type ──
@@ -169,6 +209,9 @@ export interface PurchaseRequest {
   data_residency_constraint: boolean;
   request_channel: string;
   request_language: string;
+  _enable_optimization?: boolean;
+  _enable_bundling?: boolean;
+  agentic_mode?: boolean;
 }
 
 // ── Backend (Python pipeline) result types ──
@@ -360,5 +403,79 @@ export interface BackendResult {
   recommendation: BackendRecommendation;
   audit_trail: BackendAuditTrail;
   _pipeline: BackendPipelineMeta;
+  negotiation_levers?: NegotiationLever[];
+  bundle_opportunities?: BundleOpportunity[];
+  agentic_insights?: AgenticInsight[];
+  escalation_cycle_insights?: EscalationCycleInsights;
+}
+
+export interface CycleProfile {
+  escalation_target: string;
+  rule_codes: string[];
+  n: number;
+  mean_days: number;
+  median_days: number;
+  p75_days: number;
+  p90_days: number;
+  p95_days: number;
+  std_days: number;
+  min_days: number;
+  max_days: number;
+  pct_on_time: number;
+  trend_direction: 'IMPROVING' | 'STABLE' | 'WORSENING';
+  trend_delta_days: number;
+  insufficient_data: boolean;
+}
+
+export interface SegmentConcentration {
+  category_l2: string;
+  region: string;
+  n_active_suppliers: number;
+  total_awarded_eur: number;
+  hhi: number;
+  hhi_label: string;
+  top_supplier_id: string;
+  top_supplier_name: string;
+  top_supplier_share_pct: number;
+  top_3_share_pct: number;
+  dependency_flag: boolean;
+  single_source_risk: boolean;
+  supplier_shares: Array<{
+    supplier_name: string;
+    share_pct: number;
+    value_eur: number;
+  }>;
+}
+
+export interface AnalyticsData {
+  cycle_profiles: Record<string, CycleProfile>;
+  concentration_segments: SegmentConcentration[];
+}
+
+export interface AgenticInsight {
+  type: 'regional_constraint' | 'news_risk' | 'external_data';
+  title: string;
+  source: string;
+  relevance: 'high' | 'medium' | 'low';
+  summary: string;
+  impact_score: number;
+}
+
+export interface EscalationCycleInsightItem {
+  target: string;
+  urgency: 'critical' | 'tight' | 'ok' | 'unknown';
+  historical_mean_days: number;
+  historical_median_days: number;
+  historical_sample_size: number;
+  scoped_to_business_unit: boolean;
+  days_to_deadline: number | null;
+  insight: string;
+  recommended_action: string;
+}
+
+export interface EscalationCycleInsights {
+  summary: string;
+  days_to_deadline: number | null;
+  insights: EscalationCycleInsightItem[];
 }
 

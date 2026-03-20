@@ -41,6 +41,7 @@ from pathlib import Path
 from typing import Any
 
 import pandas as pd
+import time
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 0.  CONSTANTS
@@ -784,7 +785,7 @@ class ProcurementRuleEngine:
         policies_checked: list[str] = []
 
         # ── Step 1: basic fields ────────────────────────────────────────────
-        req_id          = request["request_id"]
+        req_id          = request.get("request_id", f"req_{int(time.time())}")
         category_l1     = request.get("category_l1", "")
         category_l2     = request.get("category_l2", "")
         quantity        = request.get("quantity")         # may be None

@@ -229,5 +229,17 @@ export function adaptBackendResult(b: BackendResult): AnalysisResult {
       : ['Review escalation requirements', 'Obtain required quotes', 'Route for human approval'],
   };
 
-  return { request_parsed, compatibility, policy_evaluation, suppliers, escalations, recommendation, audit_log };
+  return {
+    request_parsed,
+    compatibility,
+    policy_evaluation,
+    suppliers,
+    escalations,
+    recommendation,
+    audit_log,
+    negotiation_levers: b.negotiation_levers,
+    bundle_opportunities: b.bundle_opportunities,
+    agentic_insights: b.agentic_insights,
+    escalation_cycle_insights: b.escalation_cycle_insights,
+  };
 }

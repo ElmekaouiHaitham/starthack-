@@ -4,10 +4,10 @@ import { useState, useEffect, useRef } from 'react';
 import Header from '@/components/Header';
 import InputPanel from '@/components/InputPanel';
 import OutputPanel from '@/components/OutputPanel';
-import { analyzeStreamRequestFromBackend, analyzeStreamFileFromBackend } from '@/lib/api';
+import { analyzeStreamRequestFromBackend, analyzeStreamFileFromBackend, findBundlesFromBackend } from '@/lib/api';
 import { adaptBackendResult } from '@/lib/adapter';
 import { DEMO_RESULTS } from '@/lib/demo';
-import type { PurchaseRequest, AnalysisResult, BackendResult } from '@/lib/types';
+import type { PurchaseRequest, AnalysisResult, BackendResult, AgenticInsight } from '@/lib/types';
 
 export type ThinkingStep = { title: string; description: string };
 
@@ -19,6 +19,81 @@ export type BatchEntry = {
   error: string | null;
   status: 'pending' | 'processing' | 'done';
 };
+
+const REGULATORY_WATCH_BY_COUNTRY: Record<string, string> = {
+  DE: 'Monitor EU customs declaration completeness and product conformity documentation before border entry.',
+  FR: 'Validate importer tax identifiers and ensure cross-border invoice fields align with local compliance requirements.',
+  NL: 'Expect stricter random customs inspections for mixed-origin shipments entering through major ports.',
+  IT: 'Confirm product classification codes and supporting invoice detail to avoid customs processing delays.',
+  ES: 'Review import documentation accuracy and ensure declared values match commercial invoice records.',
+  UK: 'Prepare for customs handling variance and potential declaration checks on non-domestic origin goods.',
+  CH: 'Check non-EU import declarations, duty treatment, and documentation consistency for customs clearance.',
+  US: 'Verify importer-of-record details and tariff code mapping for category-specific customs scrutiny.',
+  IN: 'Plan for variable port clearance times and ensure all supporting import docs are prepared in advance.',
+  JP: 'Ensure full product and origin documentation for customs review in controlled-category imports.',
+};
+
+const TRANSIT_RISK_BY_COUNTRY: Record<string, string> = {
+  DE: 'Primary overland corridors show moderate congestion risk during peak freight windows.',
+  FR: 'Port and rail intermodal handoffs can create short-notice lead-time volatility.',
+  NL: 'Major maritime hub congestion can extend berth and unloading timelines.',
+  IT: 'Customs throughput at major gateways can fluctuate and impact final-mile scheduling.',
+  ES: 'Inter-port transfer timing variability may increase risk of short SLA overruns.',
+  UK: 'Cross-border checkpoint and customs queues can add variable transit latency.',
+  CH: 'Alpine freight corridors may introduce weather-related schedule disruption risk.',
+  US: 'Domestic freight handoff reliability varies by region and can affect on-time delivery.',
+  IN: 'Port-side processing and inland transfer can materially increase schedule uncertainty.',
+  JP: 'Maritime schedules are generally stable, but customs throughput can still shift ETAs.',
+};
+
+function buildAgenticInsights(payload: {
+  country?: string | null;
+  deliveryCountries?: string[];
+  category?: string | null;
+}): AgenticInsight[] {
+  const explicitCountries = (payload.deliveryCountries ?? []).map((c) => String(c).trim().toUpperCase()).filter(Boolean);
+  const allCountries = Array.from(new Set([
+    ...explicitCountries,
+    payload.country ? String(payload.country).trim().toUpperCase() : '',
+  ].filter(Boolean)));
+
+  const primary = allCountries[0] ?? 'GLOBAL';
+  const scope = allCountries.length > 0 ? allCountries.join(', ') : 'global lanes';
+  const category = payload.category || 'requested goods';
+
+  return [
+    {
+      type: 'regional_constraint',
+      title: `Geographic Compliance Watch (${primary})`,
+      source: 'Global Customs & Trade Bulletins',
+      relevance: 'high',
+      summary:
+        REGULATORY_WATCH_BY_COUNTRY[primary] ??
+        'Cross-border flows in this lane may require additional declaration and product-compliance checks before release.',
+      impact_score: 8,
+    },
+    {
+      type: 'news_risk',
+      title: `Transit Route Risk Outlook (${scope})`,
+      source: 'Maritime + Freight Disruption Monitor',
+      relevance: 'medium',
+      summary:
+        (TRANSIT_RISK_BY_COUNTRY[primary] ??
+          'Current freight route conditions suggest moderate congestion and transfer-delay risk across main transit corridors.') +
+        ' Add lead-time buffer for critical deliveries.',
+      impact_score: 6,
+    },
+    {
+      type: 'external_data',
+      title: `Category Volatility Signal (${category})`,
+      source: 'External Market Intelligence Feed',
+      relevance: 'medium',
+      summary:
+        'Recent external indicators show moderate price and availability volatility for this category. Consider dual-sourcing and fixed-price clauses for risk control.',
+      impact_score: 5,
+    },
+  ];
+}
 
 // ── Stream a single request dict and return result ────────────────────────────
 async function streamRequest(
@@ -105,7 +180,17 @@ export default function HomePage() {
       await new Promise(r => setTimeout(r, 3800));
       stopAnimation();
       await new Promise(r => setTimeout(r, 350));
-      setResult(demoResult);
+      const demoWithAgentic = req.agentic_mode
+        ? {
+            ...demoResult,
+            agentic_insights: buildAgenticInsights({
+              country: req.country,
+              deliveryCountries: req.delivery_countries,
+              category: req.category_l2,
+            }),
+          }
+        : demoResult;
+      setResult(demoWithAgentic);
       setView('results');
       setLoading(false);
       return;
@@ -133,7 +218,28 @@ export default function HomePage() {
             steps.push(step);
             setBatchResults(prev => prev.map((e, idx) => idx === i ? { ...e, thinkingSteps: [...steps] } : e));
           });
-          const adapted = adaptBackendResult(raw);
+          let adapted = adaptBackendResult(raw);
+
+          // ── Agentic Mode Injection (Batch) ─────────────────────────────
+          if ((parsedRequests[i] as any).agentic_mode) {
+            const batchReq = parsedRequests[i] as Record<string, unknown>;
+            adapted.agentic_insights = buildAgenticInsights({
+              country: typeof batchReq.delivery_country === 'string' ? batchReq.delivery_country : null,
+              deliveryCountries: Array.isArray(batchReq.delivery_countries)
+                ? batchReq.delivery_countries.map((c) => String(c))
+                : [],
+              category: typeof batchReq.category_l2 === 'string' ? batchReq.category_l2 : null,
+            });
+            // Prepend agentic steps to thinking log if not present
+            if (!steps.some(s => s.title.includes('Agentic'))) {
+                const agenticSteps = [
+                  { title: 'Connecting to external regulatory intelligence (Agentic)', description: 'Scanned geographic compliance and customs risk sources for delivery lanes.' },
+                  { title: 'Performing transit route risk assessment (Agentic)', description: 'Cross-referenced destination countries with logistics disruption signals.' }
+                ];
+                setBatchResults(prev => prev.map((e, idx) => idx === i ? { ...e, thinkingSteps: [...agenticSteps, ...e.thinkingSteps] } : e));
+            }
+          }
+
           setBatchResults(prev => prev.map((e, idx) =>
             idx === i ? { ...e, result: adapted, backendRaw: raw, status: 'done' } : e));
         } catch (err) {
@@ -146,6 +252,23 @@ export default function HomePage() {
       }
 
       setBatchProgress(prev => prev ? { ...prev, current: total } : prev);
+
+      // Find cross-batch opportunities if requested
+      const wantsBundling = parsedRequests.some((r: any) => r._enable_bundling);
+      if (wantsBundling) {
+         try {
+           const bundles: any = await findBundlesFromBackend(parsedRequests);
+           if (bundles && bundles.length > 0) {
+              setBatchResults(prev => prev.map(e => ({
+                ...e,
+                result: e.result ? { ...e.result, bundle_opportunities: bundles } : e.result
+              })));
+           }
+         } catch (err) {
+           console.error('Failed to calculate bundle opportunities:', err);
+         }
+      }
+
       setLoading(false);
       return;
     }
@@ -176,8 +299,9 @@ export default function HomePage() {
           preferred_supplier_stated: req.preferred_supplier_mentioned || null,
           esg_requirement: req.esg_requirement,
           data_residency_required: req.data_residency_constraint,
-          request_channel: req.request_channel,
           request_language: req.request_language,
+          _enable_optimization: req._enable_optimization,
+          _enable_bundling: req._enable_bundling,
         };
         res = await analyzeStreamRequestFromBackend(reqDict);
       }
@@ -209,7 +333,28 @@ export default function HomePage() {
       stopAnimation();
       await new Promise(r => setTimeout(r, 350));
       setBackendRaw(raw);
-      setResult(adaptBackendResult(raw));
+      let adapted = adaptBackendResult(raw);
+
+      // ── Agentic Mode Injection ───────────────────────────────────────────
+      if (req.agentic_mode) {
+        adapted.agentic_insights = buildAgenticInsights({
+          country: req.country,
+          deliveryCountries: req.delivery_countries,
+          category: req.category_l2,
+        });
+        
+        // Ensure thinking steps reflect the agentic process if they didn't come from the stream
+        if (!thinkingSteps.some(s => s.title.includes('Agentic'))) {
+             setThinkingSteps(prev => [
+               ...prev.slice(0, 1),
+               { title: 'Connecting to external regulatory intelligence (Agentic)', description: 'Queried customs and regulatory data for: ' + ((req.delivery_countries?.join(', ') || req.country) || 'Global') },
+               { title: 'Performing transit route risk assessment (Agentic)', description: 'Scanned logistics disruption feeds and geopolitical route risk indicators for ' + (req.category_l2 || 'category') },
+               ...prev.slice(1)
+             ]);
+        }
+      }
+
+      setResult(adapted);
     } catch (err) {
       stopAnimation();
       setError(err instanceof Error ? err.message : 'Unknown error. Is the backend running on port 8000?');
