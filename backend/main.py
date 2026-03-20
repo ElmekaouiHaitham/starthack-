@@ -19,6 +19,7 @@ from __future__ import annotations
 import json
 import sys
 from contextlib import asynccontextmanager
+from dataclasses import asdict
 from pathlib import Path
 
 import uvicorn
@@ -31,7 +32,7 @@ SRC_DIR = Path(__file__).parent / "src"
 sys.path.insert(0, str(SRC_DIR))
 
 from pipeline import Pipeline  # noqa: E402  (after sys.path insert)
-from historical_analytics import EscalationCycleAnalyzer, ConcentrationRiskMonitor
+from historical_analytics import ConcentrationRiskMonitor, EscalationCycleAnalyzer
 
 DATA_DIR = Path(__file__).parent / "data"
 
@@ -110,6 +111,21 @@ def _parse_json_bytes(raw: bytes) -> dict:
     raise HTTPException(status_code=422, detail="JSON must be an object or non-empty array.")
 
 
+async def _extract_request_dict(request: Request, file: UploadFile | None = None) -> dict:
+    """Read request payload from uploaded file or JSON body."""
+    content_type = request.headers.get("content-type", "")
+
+    if file is not None:
+        return _parse_json_bytes(await file.read())
+    if "application/json" in content_type:
+        return _parse_json_bytes(await request.body())
+
+    raise HTTPException(
+        status_code=415,
+        detail="Unsupported content type. Use application/json or multipart/form-data with a .json file.",
+    )
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 # ROUTES
 # ══════════════════════════════════════════════════════════════════════════════
@@ -124,14 +140,12 @@ async def get_analytics(request: Request):
     """
     Returns historical analytics: cycle time profiles and portfolio concentration.
     """
-    from dataclasses import asdict
-    
     cycle_analyzer: EscalationCycleAnalyzer = request.app.state.cycle_analyzer
     concentration: ConcentrationRiskMonitor = request.app.state.concentration_monitor
-    
+
     profiles = {k: asdict(v) for k, v in cycle_analyzer.profiles().items()}
     segments = [asdict(s) for s in concentration.segments()]
-    
+
     return {
         "cycle_profiles": profiles,
         "concentration_segments": segments
@@ -147,24 +161,7 @@ async def analyze(request: Request, file: UploadFile | None = File(default=None)
     - JSON body  (Content-Type: application/json)
     - Uploaded .json file  (multipart/form-data, field="file")
     """
-    content_type = request.headers.get("content-type", "")
-
-    if file is not None:
-        # ── File upload path ──────────────────────────────────────────────────
-        raw = await file.read()
-        request_dict = _parse_json_bytes(raw)
-
-    elif "application/json" in content_type:
-        # ── JSON body path ─────────────────────────────────────────────────
-        raw = await request.body()
-        request_dict = _parse_json_bytes(raw)
-
-    else:
-        raise HTTPException(
-            status_code=415,
-            detail="Unsupported content type. Use application/json or multipart/form-data with a .json file.",
-        )
-
+    request_dict = await _extract_request_dict(request, file)
     return _run_pipeline(request.app.state, request_dict)
 
 @app.post("/analyze-stream", tags=["pipeline"])
@@ -172,19 +169,7 @@ async def analyze_stream(request: Request, file: UploadFile | None = File(defaul
     """
     Analyze a single procurement request, streaming the execution steps back to the client.
     """
-    content_type = request.headers.get("content-type", "")
-
-    if file is not None:
-        raw = await file.read()
-        request_dict = _parse_json_bytes(raw)
-    elif "application/json" in content_type:
-        raw = await request.body()
-        request_dict = _parse_json_bytes(raw)
-    else:
-        raise HTTPException(
-            status_code=415,
-            detail="Unsupported content type. Use application/json or multipart/form-data with a .json file.",
-        )
+    request_dict = await _extract_request_dict(request, file)
 
     async def event_generator():
         try:

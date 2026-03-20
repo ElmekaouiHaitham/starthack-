@@ -13,6 +13,8 @@ langchain-community
 
 # Evaluation
 pandas
+numpy
+scikit-learn
 
 # Utilities
 ipykernel  # To run notebooks
@@ -21,4 +23,7 @@ tqdm       # For progress bars
 # API Server
 fastapi
 uvicorn[standard]
-python-multipart
+python-multipart
+
+# Gemini SDKs used in backend modules
+google-generativeai

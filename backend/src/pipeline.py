@@ -236,10 +236,8 @@ class Pipeline:
 
         # ── Layer 5: Negotiation Advisor ──────────────────────────────────────
         run_opt = request.get("_enable_optimization", self.enable_optimization)
-        print(f"DEBUG: run_opt={run_opt}, advisor={self.advisor is not None}")
         if run_opt and self.advisor:
             levers = self.advisor.advise(final_output, request)
-            print(f"DEBUG: Found {len(levers)} levers for {req_id}")
             final_output["negotiation_levers"] = [asdict(l) for l in levers]
 
         return final_output
@@ -252,7 +250,6 @@ class Pipeline:
         """
         Process request and yield thinking steps followed by final result.
         """
-        import time
         req_id = request.get("request_id", "unknown")
         
         yield {"type": "step", "title": "Request Received", "description": f"Looking up details for your request {req_id}"}
