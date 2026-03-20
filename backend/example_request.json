@@ -1,0 +1,33 @@
+{
+  "request_id": "REQ-000002",
+  "created_at": "2026-04-13T15:22:00Z",
+  "request_channel": "portal",
+  "request_language": "en",
+  "business_unit": "Regional IT EU",
+  "country": "NL",
+  "site": "Amsterdam",
+  "requester_id": "USR-3002",
+  "requester_role": "Infrastructure Manager",
+  "submitted_for_id": "USR-8002",
+  "category_l1": "IT",
+  "category_l2": "Cloud Compute",
+  "title": "Cloud compute capacity request",
+  "request_text": "Need cloud compute capacity estimated at 120000 instance hours per month. Please move quickly. Budget should stay near 14 400.00 EUR. We would like to stay with Azure Enterprise if possible.",
+  "currency": "EUR",
+  "budget_amount": 14400.0,
+  "quantity": null,
+  "unit_of_measure": "instance_hour",
+  "required_by_date": "2026-05-11",
+  "preferred_supplier_mentioned": "Azure Enterprise",
+  "incumbent_supplier": "Swiss Sovereign Cloud",
+  "contract_type_requested": "framework call-off",
+  "delivery_countries": [
+    "NL"
+  ],
+  "data_residency_constraint": false,
+  "esg_requirement": true,
+  "status": "new",
+  "scenario_tags": [
+    "missing_info"
+  ]
+}

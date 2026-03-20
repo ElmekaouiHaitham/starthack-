@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import { CAT2 } from '@/lib/data';
 import { EXAMPLE_REQUESTS } from '@/lib/demo';
 import type { PurchaseRequest } from '@/lib/types';
+import { InlineIcon } from '@/components/InlineIcon';
 
 interface InputPanelProps {
   onAnalyze: (req: PurchaseRequest, demoKey?: string, uploadedFile?: File, parsedRequests?: Record<string, unknown>[]) => void;
@@ -317,7 +318,8 @@ export default function InputPanel({ onAnalyze, loading }: InputPanelProps) {
               }}>
                 <input type="checkbox" checked={!!form.agenticMode} onChange={e => setField('agenticMode', e.target.checked)}
                   style={{ width: 13, height: 13, accentColor: '#fff', cursor: 'pointer' }} />
-                ✨ Agentic Mode (External Data)
+                <InlineIcon name="sparkles" size={14} />
+                Agentic Mode (External Data)
               </label>
             </div>
           </FG>
@@ -357,13 +359,22 @@ export default function InputPanel({ onAnalyze, loading }: InputPanelProps) {
             — Load Example Scenario —
           </div>
           <button className="btn-secondary" onClick={() => loadExample('restricted')}>
-            🔴&nbsp; Restricted Supplier + Tight Deadline
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#DC2626', display: 'inline-block' }} />
+              Restricted Supplier + Tight Deadline
+            </span>
           </button>
           <button className="btn-secondary" onClick={() => loadExample('missing')}>
-            🟡&nbsp; Missing Budget &amp; Quantity
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#B45309', display: 'inline-block' }} />
+              Missing Budget &amp; Quantity
+            </span>
           </button>
           <button className="btn-secondary" onClick={() => loadExample('standard')}>
-            🟢&nbsp; Standard Clean Request
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#059669', display: 'inline-block' }} />
+              Standard Clean Request
+            </span>
           </button>
         </div>
       )}
@@ -382,19 +393,26 @@ export default function InputPanel({ onAnalyze, loading }: InputPanelProps) {
               if (e.dataTransfer.files[0]) readFile(e.dataTransfer.files[0]);
             }}
           >
-            <div style={{ fontSize: 28, marginBottom: 8, opacity: 0.4 }}>⬆</div>
+            <div style={{ marginBottom: 8, opacity: 0.4, display: 'flex', justifyContent: 'center' }}>
+              <InlineIcon name="upload" size={28} />
+            </div>
             <div style={{ fontSize: 13 }}>Drop <strong>requests.json</strong> here</div>
             <div style={{ fontSize: 11, marginTop: 5, color: '#94A3B8' }}>or click to browse · accepts .json</div>
             {fileName && (
               <div style={{ marginTop: 10, fontSize: 11, color: '#E30613' }}>
-                📄 {fileName}
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                  <InlineIcon name="document" size={14} />
+                  {fileName}
+                </span>
                 {requestCount != null && requestCount > 1 && (
                   <span style={{ marginLeft: 8, background: '#1E293B', color: '#fff', borderRadius: 3, padding: '1px 7px', fontSize: 10, fontWeight: 700 }}>
-                    📋 {requestCount} requests — batch mode
+                    <InlineIcon name="clipboard" size={13} /> {requestCount} requests — batch mode
                   </span>
                 )}
                 {requestCount === 1 && (
-                  <span style={{ marginLeft: 8, color: '#059669', fontSize: 10, fontWeight: 600 }}>✓ 1 request</span>
+                  <span style={{ marginLeft: 8, color: '#059669', fontSize: 10, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                    <InlineIcon name="check" size={12} /> 1 request
+                  </span>
                 )}
               </div>
             )}
@@ -434,7 +452,8 @@ export default function InputPanel({ onAnalyze, loading }: InputPanelProps) {
               }}>
                 <input type="checkbox" checked={!!form.agenticMode} onChange={e => setField('agenticMode', e.target.checked)}
                   style={{ width: 13, height: 13, accentColor: '#fff', cursor: 'pointer' }} />
-                ✨ Agentic Mode (External Data)
+                <InlineIcon name="sparkles" size={14} />
+                Agentic Mode (External Data)
               </label>
             </div>
           </FG>

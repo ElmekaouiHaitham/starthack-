@@ -246,5 +246,81 @@
       ]
     },
     "contradictions": []
+  },
+  "WEB-1773968834537": {
+    "request_id": "WEB-1773968834537",
+    "cache_hit": false,
+    "processing_notes": [],
+    "extraction": {
+      "detected_language": "en",
+      "english_translation": null,
+      "qty_primary": 120000.0,
+      "qty_primary_unit": "instance hours per month",
+      "qty_total_rollout": null,
+      "qty_ambiguity_note": null,
+      "budget_extracted": 14400.0,
+      "budget_currency": "EUR",
+      "preferred_supplier_in_text": "Azure Enterprise",
+      "policy_refusal": null,
+      "spec_mentioned": null,
+      "spec_implies_higher_cost": false,
+      "esg_signal_in_text": false,
+      "data_residency_signal_in_text": false,
+      "urgency_level": "urgent",
+      "key_constraints": []
+    },
+    "contradictions": []
+  },
+  "WEB-1773976730756": {
+    "request_id": "WEB-1773976730756",
+    "cache_hit": false,
+    "processing_notes": [],
+    "extraction": {
+      "detected_language": "en",
+      "english_translation": null,
+      "qty_primary": 120000.0,
+      "qty_primary_unit": "instance hours per month",
+      "qty_total_rollout": null,
+      "qty_ambiguity_note": null,
+      "budget_extracted": 14400.0,
+      "budget_currency": "EUR",
+      "preferred_supplier_in_text": "Azure Enterprise",
+      "policy_refusal": null,
+      "spec_mentioned": null,
+      "spec_implies_higher_cost": false,
+      "esg_signal_in_text": false,
+      "data_residency_signal_in_text": false,
+      "urgency_level": "urgent",
+      "key_constraints": []
+    },
+    "contradictions": []
+  },
+  "REQ-000008": {
+    "request_id": "REQ-000008",
+    "cache_hit": false,
+    "processing_notes": [
+      "JSON parse error: API returned invalid JSON: Unterminated string starting at: line 14 column 3 (char 377)\nRaw response:\n{\n  \"detected_lang"
+    ],
+    "extraction": {
+      "detected_language": "en",
+      "english_translation": null,
+      "qty_primary": 400000.0,
+      "qty_primary_unit": "GB",
+      "qty_total_rollout": null,
+      "qty_ambiguity_note": null,
+      "budget_extracted": 11200.0,
+      "budget_currency": "EUR",
+      "preferred_supplier_in_text": "Azure Enterprise",
+      "policy_refusal": null,
+      "spec_mentioned": null,
+      "spec_implies_higher_cost": false,
+      "esg_signal_in_text": false,
+      "data_residency_signal_in_text": true,
+      "urgency_level": "standard",
+      "key_constraints": [
+        "Delivery required by 2026-03-22"
+      ]
+    },
+    "contradictions": []
   }
 }

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import type { AnalysisResult, SupplierResult, PolicyRule, Escalation, AuditEntry, BackendResult, NegotiationLever, BundleOpportunity, AgenticInsight, EscalationCycleInsights } from '@/lib/types';
 import type { BatchEntry } from '@/app/page';
+import { InlineIcon } from '@/components/InlineIcon';
 
 // ”€”€ Utility ”€”€
 function h(s: unknown): string {
@@ -107,13 +108,17 @@ function ParsedRequestCard({ data, compat }: { data: AnalysisResult['request_par
       </div>
       {compat.issues.length === 0 ? (
         <div style={{ color: '#059669', fontSize: 12, display: 'flex', alignItems: 'center', gap: 5 }}>
-          <span>✓</span> No compatibility issues detected
+          <InlineIcon name="check" size={14} color="#059669" /> No compatibility issues detected
         </div>
       ) : (
         compat.issues.map((issue, i) => {
           const color = issue.severity === 'error' ? '#DC2626' : issue.severity === 'warning' ? '#B45309' : '#1D4ED8';
           const bg = issue.severity === 'error' ? 'rgba(220,38,38,0.05)' : issue.severity === 'warning' ? 'rgba(180,83,9,0.05)' : 'rgba(29,78,216,0.05)';
-          const icon = issue.severity === 'error' ? '✗' : issue.severity === 'warning' ? '!' : 'i';
+          const icon: 'x' | 'exclamation' | 'info' = issue.severity === 'error'
+            ? 'x'
+            : issue.severity === 'warning'
+              ? 'exclamation'
+              : 'info';
           return (
             <div key={i} style={{
               display: 'flex', gap: 9, padding: '8px 10px', borderRadius: 3, marginBottom: 5,
@@ -122,7 +127,9 @@ function ParsedRequestCard({ data, compat }: { data: AnalysisResult['request_par
               <div style={{
                 fontSize: 11, color: '#fff', flexShrink: 0, width: 16, height: 16, borderRadius: '50%',
                 background: color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, marginTop: 1,
-              }}>{icon}</div>
+              }}>
+                <InlineIcon name={icon} size={12} color="#fff" />
+              </div>
               <div>
                 <div style={{ fontSize: 9, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#6B7280', marginBottom: 2, fontWeight: 600 }}>{issue.field}</div>
                 <div style={{ fontSize: 11.5, color: '#0F172A', lineHeight: 1.5 }}>{issue.description}</div>
@@ -161,7 +168,9 @@ function PolicyCard({ rules }: { rules: PolicyRule[] }) {
               <div style={{ fontSize: 12, fontWeight: 600, color: '#0F172A', marginBottom: 2 }}>{rule.rule_name}</div>
               <div style={{ fontSize: 11, color: '#4B5563', lineHeight: 1.5 }}>{rule.description}</div>
               {rule.status !== 'pass' && rule.impact && (
-                <div style={{ fontSize: 10, color: '#DC2626', marginTop: 3 }}>⚡ {rule.impact}</div>
+                <div style={{ fontSize: 10, color: '#DC2626', marginTop: 3, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <InlineIcon name="bolt" size={14} color="#DC2626" /> {rule.impact}
+                </div>
               )}
             </div>
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: dot, marginTop: 5, flexShrink: 0 }} />
@@ -217,7 +226,7 @@ function SupplierCard({ suppliers }: { suppliers: SupplierResult[] }) {
                       background: isRecommended && !isRestricted ? '#0F172A' : '#F1F5F9',
                       color: isRecommended && !isRestricted ? '#fff' : '#6B7280',
                     }}>
-                      {isRestricted ? '✗' : s.rank}
+                      {isRestricted ? <InlineIcon name="x" size={12} /> : s.rank}
                     </span>
                   </td>
                   {/* Name */}
@@ -271,7 +280,7 @@ function EscalationCard({ escalations }: { escalations: Escalation[] }) {
       <StepCard num={4} numColor="#059669" title="Escalation Assessment"
         sub="Human review requirements" badge="NO ESCALATION" badgeType="ok">
         <div style={{ color: '#059669', fontSize: 12, display: 'flex', alignItems: 'center', gap: 5 }}>
-          <span>✓</span> No escalation required. Automated decision is permissible.
+          <InlineIcon name="check" size={14} color="#059669" /> No escalation required. Automated decision is permissible.
         </div>
       </StepCard>
     );
@@ -519,7 +528,11 @@ function AgenticCard({ insights }: { insights?: AgenticInsight[] }) {
     <div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 12 }}>
         {insights.map((insight, idx) => {
-          const icon = insight.type === 'news_risk' ? '📰' : insight.type === 'regional_constraint' ? '⚖️' : '🌐';
+          const icon: 'news' | 'balance' | 'globe' = insight.type === 'news_risk'
+            ? 'news'
+            : insight.type === 'regional_constraint'
+              ? 'balance'
+              : 'globe';
           const relColor = insight.relevance === 'high' ? '#DC2626' : insight.relevance === 'medium' ? '#B45309' : '#374151';
           
           return (
@@ -530,7 +543,7 @@ function AgenticCard({ insights }: { insights?: AgenticInsight[] }) {
               position: 'relative', overflow: 'hidden'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                 <span style={{ fontSize: 18 }}>{icon}</span>
+                 <InlineIcon name={icon} size={20} color="#7C3AED" />
                  <div>
                    <div style={{ fontSize: 9, fontWeight: 700, color: '#7C3AED', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                      {insight.type.replace(/_/g, ' ')} · {insight.source}
@@ -680,7 +693,9 @@ function AIThinkingSteps({ steps, expandedInitially = false, isComplete = false 
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
            {isComplete ? (
-             <div style={{ width: 14, height: 14, background: '#059669', borderRadius: '50%', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700 }}>✓</div>
+             <div style={{ width: 14, height: 14, background: '#059669', borderRadius: '50%', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>
+               <InlineIcon name="check" size={10} color="#fff" />
+             </div>
            ) : (
              <div style={{ width: 14, height: 14, border: '2px solid #6366F1', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite', opacity: open ? 1 : 0.5 }} />
            )}
@@ -699,7 +714,9 @@ function AIThinkingSteps({ steps, expandedInitially = false, isComplete = false 
               <div key={i} style={{ display: 'flex', gap: 12 }}>
                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: 22, flexShrink: 0 }}>
                     {isComplete || !isLast ? (
-                      <div style={{ width: 22, height: 22, borderRadius: '50%', background: '#059669', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700 }}>✓</div>
+                     <div style={{ width: 22, height: 22, borderRadius: '50%', background: '#059669', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>
+                       <InlineIcon name="check" size={12} color="#fff" />
+                     </div>
                     ) : (
                       <div style={{ width: 22, height: 22, borderRadius: '50%', background: '#EEF2FF', color: '#6366F1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700 }}>{i + 1}</div>
                     )}
@@ -766,7 +783,7 @@ function LoadingView({ activeStep, thinkingSteps }: { activeStep: number, thinki
                   fontSize: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff',
                   animation: active ? 'pulse-dot 1s ease-in-out infinite' : 'none',
                 }}>
-                  {done ? '✓' : ''}
+                  {done ? <InlineIcon name="check" size={8} color="#fff" /> : null}
                 </div>
                 {step}
               </div>
@@ -793,9 +810,18 @@ function EmptyState() {
         Enter a purchase request on the left and click <strong style={{ color: '#0F172A' }}>Analyse Request</strong> to run the full 6-step procurement pipeline.
       </div>
       <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', justifyContent: 'center', marginTop: 8, fontSize: 11.5, color: '#94A3B8' }}>
-        <span>🔴 Restricted supplier scenarios</span>
-        <span>🟡 Missing information detection</span>
-        <span>🟢 Auto-approve flows</span>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#DC2626', display: 'inline-block' }} />
+          Restricted supplier scenarios
+        </span>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#B45309', display: 'inline-block' }} />
+          Missing information detection
+        </span>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#059669', display: 'inline-block' }} />
+          Auto-approve flows
+        </span>
       </div>
     </div>
   );
@@ -812,8 +838,17 @@ function SectionHeader({ title }: { title: string }) {
 }
 
 function KV({ label, val, mono }: { label: string; val: unknown; mono?: boolean }) {
-  const display = val == null ? '—' : typeof val === 'boolean' ? (val ? '✓ yes' : '✗ no') : String(val);
-  const empty = display === '—';
+  const empty = val == null;
+  const display = val == null
+    ? '—'
+    : typeof val === 'boolean'
+      ? (
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <InlineIcon name={val ? 'check' : 'x'} size={12} color={val ? '#059669' : '#DC2626'} />
+          {val ? 'yes' : 'no'}
+        </span>
+      )
+      : String(val);
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '160px 1fr', gap: 6, padding: '3px 0', borderBottom: '1px solid #F8FAFC', alignItems: 'start' }}>
       <div style={{ fontSize: 10, color: '#6B7280', fontWeight: 600 }}>{label}</div>
@@ -1251,6 +1286,10 @@ function generateAuditHTML(result: AnalysisResult, backendRaw: BackendResult | n
     </table>
   </div>`;
 
+  // Small inline SVG strings for the HTML audit report (this is plain HTML, not React JSX).
+  const checkSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>`;
+  const warningSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l10 18H2L12 2z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>`;
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1337,9 +1376,9 @@ function generateAuditHTML(result: AnalysisResult, backendRaw: BackendResult | n
     </div>
     ${result.compatibility.issues.length > 0 ? `
     <div style="margin-top:12px">
-      <div style="font-size:11px;font-weight:700;color:#B45309;margin-bottom:6px">⚠ Validation Issues</div>
+      <div style="font-size:11px;font-weight:700;color:#B45309;margin-bottom:6px;display:flex;align-items:center;gap:6px">${warningSvg} Validation Issues</div>
       ${result.compatibility.issues.map(i => `<div style="font-size:11px;color:#374151;padding:4px 0;border-bottom:1px solid #F1F5F9">${h(i.field)}: ${h(i.description)}</div>`).join('')}
-    </div>` : '<div style="font-size:11px;color:#059669;font-weight:600;margin-top:8px">✓ All mandatory fields validated — no issues detected</div>'}
+    </div>` : `<div style="font-size:11px;color:#059669;font-weight:600;margin-top:8px;display:flex;align-items:center;gap:6px">${checkSvg} All mandatory fields validated — no issues detected</div>`}
   </div>
 
   <!-- 2. Policy Evaluation -->
@@ -1600,9 +1639,9 @@ function BatchTabBar({
             animation: 'spin 0.8s linear infinite', flexShrink: 0,
           }} />
         ) : hasDone ? (
-          <span style={{ color: '#059669', fontSize: 10, fontWeight: 800, lineHeight: 1 }}>✓</span>
+          <InlineIcon name="check" size={14} color="#059669" />
         ) : hasError ? (
-          <span style={{ color: '#DC2626', fontSize: 10, fontWeight: 800, lineHeight: 1 }}>✗</span>
+          <InlineIcon name="x" size={14} color="#DC2626" />
         ) : (
           <span style={{ color: '#CBD5E1', fontSize: 9, fontWeight: 700, lineHeight: 1 }}>●</span>
         );
@@ -1661,7 +1700,9 @@ function BatchEntryPanel({ entry }: { entry: BatchEntry }) {
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
           padding: '48px 20px', gap: 10, color: '#94A3B8',
         }}>
-          <div style={{ fontSize: 28, opacity: 0.35 }}>⏳</div>
+          <div style={{ opacity: 0.35, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <InlineIcon name="clock" size={28} color="#94A3B8" />
+          </div>
           <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.05em' }}>QUEUED</div>
           <div style={{ fontSize: 11, color: '#CBD5E1' }}>This request is waiting to be processed</div>
         </div>
@@ -1766,7 +1807,9 @@ function BatchView({
             }} />
           )}
           {allDone && (
-            <div style={{ width: 14, height: 14, borderRadius: '50%', background: '#059669', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700 }}>✓</div>
+            <div style={{ width: 14, height: 14, borderRadius: '50%', background: '#059669', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 }}>
+              <InlineIcon name="check" size={10} color="#fff" />
+            </div>
           )}
           <span style={{ fontSize: 12, fontWeight: 700, color: allDone ? '#059669' : '#4338CA' }}>
             {allDone ? `All ${entries.length} requests completed` : `Processing ${progress?.current ?? 0} of ${progress?.total ?? entries.length}…`}
@@ -1795,7 +1838,9 @@ function BatchView({
         {/* Global Batch Notice (Bundling Opportunities) */}
         {allDone && selectedEntry?.result?.bundle_opportunities && selectedEntry.result.bundle_opportunities.length > 0 && (
           <div style={{ background: '#FFFBEB', borderBottom: '1px solid #FEF3C7', padding: '10px 16px', display: 'flex', gap: 12, alignItems: 'flex-start', flexShrink: 0 }}>
-             <div style={{ fontSize: 18, alignSelf: 'center' }}>📦</div>
+             <div style={{ alignSelf: 'center' }}>
+               <InlineIcon name="package" size={22} color="#B45309" />
+             </div>
              <div>
                <div style={{ fontWeight: 700, fontSize: 12, color: '#92400E', marginBottom: 2 }}>{selectedEntry.result.bundle_opportunities.length} Bundle Opportunit{selectedEntry.result.bundle_opportunities.length > 1 ? 'ies' : 'y'} Detected Across Batch</div>
                <div style={{ fontSize: 11, color: '#B45309', marginBottom: 6 }}>The Demand Aggregator found overlaps in the requested items that qualify for volume discounts.</div>
